@@ -71,8 +71,7 @@ class TimerState {
       timerRemainingDuration:
           timerRemainingDuration ?? this.timerRemainingDuration,
       isTimerActive: isTimerActive ?? this.isTimerActive,
-      isTimerPaused: isPaused ??
-          this.isTimerPaused, // Using isPaused for convenience in toggle
+      isTimerPaused: isTimerPaused ?? this.isTimerPaused,
       intervalWorkDuration: intervalWorkDuration ?? this.intervalWorkDuration,
       intervalBreakDuration:
           intervalBreakDuration ?? this.intervalBreakDuration,

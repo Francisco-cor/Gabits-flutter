@@ -19,7 +19,6 @@ import 'package:gabits/models/habit_model.dart';
 import 'package:gabits/models/note_model.dart';
 import 'package:gabits/models/diary_entry_model.dart';
 import 'package:gabits/services/database_service.dart';
-import 'package:gabits/theme/app_theme.dart';
 import 'package:gabits/providers/habits_provider.dart';
 import 'package:isar_community/isar.dart';
 
@@ -577,9 +576,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
     BorderRadius cardBorderRadius = BorderRadius.circular(16.0);
     final cardShape = theme.cardTheme.shape;
     if (cardShape is RoundedRectangleBorder) {
-      final resolvedShape =
+      cardBorderRadius =
           cardShape.borderRadius.resolve(Directionality.of(context));
-      if (resolvedShape is BorderRadius) cardBorderRadius = resolvedShape;
     }
 
     final bool isShowingReward = _habitIdInRewardState == habit.id;

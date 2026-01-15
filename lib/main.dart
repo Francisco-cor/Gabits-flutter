@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gabits/app.dart';
-import 'package:gabits/main.dart';
 import 'package:gabits/services/database_service.dart';
 
 void main() async {

@@ -313,7 +313,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen>
     final cardBaseBorderRadius =
         (theme.cardTheme.shape as RoundedRectangleBorder?)
                 ?.borderRadius
-                ?.resolve(Directionality.of(context)) ??
+                .resolve(Directionality.of(context)) ??
             BorderRadius.circular(16.0);
 
     return ListView.builder(
