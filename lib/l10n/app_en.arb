@@ -1,0 +1,222 @@
+{
+    "@@locale": "en",
+    "homeScreenTitle": "Routine Manager",
+    "myHabits": "My Habits",
+    "myNotes": "My Notes",
+    "diary": "Diary",
+    "routineSectionTitle": "Daily Routine",
+    "today": "Today",
+    "startsIn": "Starts in",
+    "newButtonLabel": "New",
+    "newHabitOption": "New Habit",
+    "newNoteOption": "New Note",
+    "newDiaryEntryOption": "New Diary Entry",
+    "newHabitTitle": "New Habit",
+    "newNoteTitle": "New Note",
+    "newDiaryEntryTitle": "New Diary Entry",
+    "habitNameLabel": "Habit name",
+    "habitNameHint": "Enter habit name",
+    "descriptionLabel": "Description",
+    "descriptionHint": "(optional)",
+    "goalTypeLabel": "Type of goal",
+    "goalTypeYesNo": "Yes or No",
+    "goalTypeTime": "Time",
+    "goalTypeQuantity": "Quantity",
+    "timeLabel": "Time",
+    "timeHint": "Enter time (e.g., 60 for minutes)",
+    "quantityLabel": "Quantity",
+    "quantityHint": "Enter quantity (e.g., 10 for pages)",
+    "colorLabel": "Color",
+    "scheduleLabel": "Schedule",
+    "sundayShort": "S",
+    "mondayShort": "M",
+    "tuesdayShort": "T",
+    "wednesdayShort": "W",
+    "thursdayShort": "T",
+    "fridayShort": "F",
+    "saturdayShort": "S",
+    "hourLabel": "Hour",
+    "selectColor": "Select Color",
+    "done": "Done",
+    "selectTime": "Select Time",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "habitNameRequired": "Habit name is required.",
+    "habitGoalValueRequired": "Goal value is required for Time/Quantity goals.",
+    "habitGoalValueInvalid": "Goal value must be a valid number.",
+    "habitScheduleRequired": "At least one day must be selected for the schedule.",
+    "passedStatus": "Passed",
+    "noHabitsToday": "Nothing here for today!",
+    "startsNowStatus": "Starts now!",
+    "tapPlusToAddHabit": "Tap '+' to add a new habit for today.",
+    "editButtonLabel": "Edit",
+    "deleteButtonLabel": "Delete",
+    "confirmDeleteTitle": "Confirm Delete",
+    "confirmDeleteMessage": "Are you sure you want to delete '%s'? This action cannot be undone.",
+    "noHabitsYet": "No habits created yet.",
+    "tapPlusToCreateOne": "Tap '+' to create your first habit!",
+    "everyDay": "Every day",
+    "doneButtonLabel": "Done",
+    "noteTitleLabel": "Title",
+    "noteTitleHint": "Enter note title",
+    "noteContentLabel": "Content",
+    "noteContentHint": "Start writing your note...",
+    "saveButtonLabel": "Done",
+    "noteTitleRequired": "Note title cannot be empty",
+    "noteContentRequired": "Note content cannot be empty",
+    "noNotesYet": "No notes yet",
+    "tapPlusToCreateOneNote": "Tap '+' to create your first note",
+    "addBulletedList": "Bulleted List",
+    "addNumberedList": "Numbered List",
+    "addCheckboxList": "Checkbox List",
+    "changeTextColor": "Text Color",
+    "insertTable": "Insert Table (Basic)",
+    "textFormattingTooltip": "Text Formatting",
+    "boldLabel": "Bold",
+    "italicLabel": "Italic",
+    "underlineLabel": "Underline",
+    "strikethroughLabel": "Strikethrough",
+    "listAndBlockStylesTooltip": "List & Block Styles",
+    "headerStylesLabel": "Header Styles",
+    "normalTextLabel": "Normal Text",
+    "heading1Label": "Heading 1",
+    "heading2Label": "Heading 2",
+    "heading3Label": "Heading 3",
+    "blockquoteLabel": "Blockquote",
+    "codeBlockLabel": "Code Block",
+    "indentIncreaseLabel": "Increase Indent",
+    "indentDecreaseLabel": "Decrease Indent",
+    "colorAndClearTooltip": "Color & Clear",
+    "clearFormattingLabel": "Clear Formatting",
+    "timerScreenTitle": "Time Management",
+    "stopwatchMode": "Stopwatch",
+    "timerMode": "Timer",
+    "intervalsMode": "Intervals",
+    "startLabel": "Start",
+    "pauseLabel": "Pause",
+    "resumeLabel": "Resume",
+    "resetLabel": "Reset",
+    "lapLabel": "Lap",
+    "lapsHeader": "Laps",
+    "lapItem": "Lap {number}",
+    "@lapItem": {
+        "description": "Label for a lap number",
+        "placeholders": {
+            "number": {
+                "type": "int"
+            }
+        }
+    },
+    "setDurationPrompt": "Set Duration",
+    "editDurationPrompt": "Edit",
+    "hoursShort": "H",
+    "minutesShortForm": "M",
+    "secondsShort": "S",
+    "timerFinishedTitle": "Time's Up!",
+    "timerFinishedMessage": "Your timer has finished.",
+    "timerDurationCannotBeZero": "Timer duration cannot be zero.",
+    "timerDurationCannotBeZeroWork": "Work duration cannot be zero.",
+    "configurePomodoroTitle": "Configure Intervals",
+    "workDurationLabel": "Work (min)",
+    "shortBreakDurationLabel": "Short Break (min)",
+    "longBreakDurationLabel": "Long Break (min)",
+    "cyclesBeforeLongBreakLabel": "Cycles before Long Break",
+    "settingsLabel": "Settings",
+    "pomodoroSessionWork": "Work Session",
+    "pomodoroSessionShortBreak": "Short Break",
+    "pomodoroSessionLongBreak": "Long Break",
+    "skipIntervalLabel": "Skip",
+    "pomodoroCycleInfo": "Cycle {currentCycle} of {totalCycles}",
+    "@pomodoroCycleInfo": {
+        "description": "Current Pomodoro cycle information",
+        "placeholders": {
+            "currentCycle": {
+                "type": "int"
+            },
+            "totalCycles": {
+                "type": "int"
+            }
+        }
+    },
+    "intervalCyclesFinishedTitle": "Intervals Finished!",
+    "intervalCyclesFinishedMessage": "All interval cycles are complete!",
+    "pomodoroNextUp": "Next: {intervalName}",
+    "@pomodoroNextUp": {
+        "description": "Label for the next Pomodoro interval",
+        "placeholders": {
+            "intervalName": {
+                "type": "String"
+            }
+        }
+    },
+    "comingSoon": "Coming Soon!",
+    "calendarTitle": "Calendar",
+    "minutesShort": "min",
+    "selectADay": "Select a day",
+    "noHabitsForThisDay": "No habits scheduled for this day.",
+    "selectAnotherDayOrAdd": "Select another day or add new habits.",
+    "nHabits": "{count,plural, =0{No habits} =1{1 habit} other{{count} habits}}",
+    "@nHabits": {
+        "description": "Number of habits for a selected day",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "example": "3"
+            }
+        }
+    },
+    "noDataAvailable": "No laps yet.",
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
+    "passedDaysAgo": "Passed {days}d ago",
+    "@passedDaysAgo": {
+        "description": "Indicates how many days ago a habit passed",
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "passedHoursAgo": "Passed {hours}h ago",
+    "@passedHoursAgo": {
+        "description": "Indicates how many hours ago a habit passed",
+        "placeholders": {
+            "hours": {
+                "type": "int"
+            }
+        }
+    },
+    "markedAsDone": "marked as done",
+    "markedAsNotDone": "marked as not done",
+    "markAsDone": "Mark as done",
+
+    "created": "Created",
+    "updated": "Updated",
+
+    "viewMyDiary": "View My Diary",
+    "diaryEntryForDate": "Entry for {date}",
+    "@diaryEntryForDate": {
+        "description": "Title for a diary entry popup, showing the date",
+        "placeholders": {
+            "date": {
+                "type": "String",
+                "example": "May 15, 2025"
+            }
+        }
+    },
+    "noDiaryEntryForThisDay": "No diary entry for this day.",
+    "selectAnotherDayOrViewDiary": "Select another day or view your diary history in the calendar.",
+    "diarySaved": "Diary entry saved.",
+    "diaryFor": "Diary for {date}",
+     "@diaryFor": {
+        "description": "Title for the diary screen, showing the current date",
+        "placeholders": {
+            "date": {
+                "type": "String",
+                "example": "May 15, 2025"
+            }
+        }
+    },
+    "emptyDiaryEntryPlaceholder": "Start writing your diary for today..."
+}

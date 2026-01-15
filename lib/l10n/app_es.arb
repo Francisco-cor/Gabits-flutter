@@ -1,0 +1,222 @@
+{
+    "@@locale": "es",
+    "homeScreenTitle": "Gestor de Rutinas",
+    "myHabits": "Mis Hábitos",
+    "myNotes": "Mis Notas",
+    "diary": "Diario",
+    "routineSectionTitle": "Rutina Diaria",
+    "today": "Hoy",
+    "startsIn": "Comienza en",
+    "newButtonLabel": "Nuevo",
+    "newHabitOption": "Nuevo Hábito",
+    "newNoteOption": "Nueva Nota",
+    "newDiaryEntryOption": "Nueva Entrada de Diario",
+    "newHabitTitle": "Nuevo Hábito",
+    "newNoteTitle": "Nueva Nota",
+    "newDiaryEntryTitle": "Nueva Entrada de Diario",
+    "habitNameLabel": "Nombre del Hábito",
+    "habitNameHint": "Introduce el nombre del hábito",
+    "descriptionLabel": "Descripción",
+    "descriptionHint": "(opcional)",
+    "goalTypeLabel": "Tipo de meta",
+    "goalTypeYesNo": "Sí o No",
+    "goalTypeTime": "Tiempo",
+    "goalTypeQuantity": "Cantidad",
+    "timeLabel": "Tiempo",
+    "timeHint": "Introduce el tiempo (ej. 60 para minutos)",
+    "quantityLabel": "Cantidad",
+    "quantityHint": "Introduce la cantidad (ej. 10 para páginas)",
+    "colorLabel": "Color",
+    "scheduleLabel": "Horario",
+    "sundayShort": "D",
+    "mondayShort": "L",
+    "tuesdayShort": "M",
+    "wednesdayShort": "X",
+    "thursdayShort": "J",
+    "fridayShort": "V",
+    "saturdayShort": "S",
+    "hourLabel": "Hora",
+    "selectColor": "Seleccionar Color",
+    "done": "Hecho",
+    "selectTime": "Seleccionar Hora",
+    "cancel": "Cancelar",
+    "ok": "Aceptar",
+    "habitNameRequired": "El nombre del hábito es obligatorio.",
+    "habitGoalValueRequired": "El valor de la meta es obligatorio para metas de Tiempo/Cantidad.",
+    "habitGoalValueInvalid": "El valor de la meta debe ser un número válido.",
+    "habitScheduleRequired": "Se debe seleccionar al menos un día para el horario.",
+    "passedStatus": "Pasó",
+    "noHabitsToday": "¡Nada por aquí para hoy!",
+    "startsNowStatus": "¡Comienza ahora!",
+    "tapPlusToAddHabit": "Toca '+' para añadir un nuevo hábito para hoy.",
+    "editButtonLabel": "Editar",
+    "deleteButtonLabel": "Eliminar",
+    "confirmDeleteTitle": "Confirmar Eliminación",
+    "confirmDeleteMessage": "¿Estás seguro de que quieres eliminar '%s'? Esta acción no se puede deshacer.",
+    "noHabitsYet": "Aún no has creado hábitos.",
+    "tapPlusToCreateOne": "¡Toca '+' para crear tu primer hábito!",
+    "everyDay": "Todos los días",
+    "doneButtonLabel": "Listo",
+    "noteTitleLabel": "Título",
+    "noteTitleHint": "Introduce el título de la nota",
+    "noteContentLabel": "Contenido",
+    "noteContentHint": "Comienza a escribir tu nota...",
+    "saveButtonLabel": "Listo",
+    "noteTitleRequired": "El título de la nota no puede estar vacío",
+    "noteContentRequired": "El contenido de la nota no puede estar vacío",
+    "noNotesYet": "Aún no hay notas",
+    "tapPlusToCreateOneNote": "Toca '+' para crear tu primera nota",
+    "addBulletedList": "Lista con Viñetas",
+    "addNumberedList": "Lista Numerada",
+    "addCheckboxList": "Lista de Tareas",
+    "changeTextColor": "Color del Texto",
+    "insertTable": "Insertar Tabla (Básica)",
+    "textFormattingTooltip": "Formato de Texto",
+    "boldLabel": "Negrita",
+    "italicLabel": "Cursiva",
+    "underlineLabel": "Subrayado",
+    "strikethroughLabel": "Tachado",
+    "listAndBlockStylesTooltip": "Estilos de Lista y Bloque",
+    "headerStylesLabel": "Estilos de Encabezado",
+    "normalTextLabel": "Texto Normal",
+    "heading1Label": "Encabezado 1",
+    "heading2Label": "Encabezado 2",
+    "heading3Label": "Encabezado 3",
+    "blockquoteLabel": "Cita en Bloque",
+    "codeBlockLabel": "Bloque de Código",
+    "indentIncreaseLabel": "Aumentar Sangría",
+    "indentDecreaseLabel": "Disminuir Sangría",
+    "colorAndClearTooltip": "Color y Limpiar",
+    "clearFormattingLabel": "Limpiar Formato",
+    "timerScreenTitle": "Gestión del Tiempo",
+    "stopwatchMode": "Cronómetro",
+    "timerMode": "Temporizador",
+    "intervalsMode": "Intervalos",
+    "startLabel": "Iniciar",
+    "pauseLabel": "Pausar",
+    "resumeLabel": "Reanudar",
+    "resetLabel": "Reiniciar",
+    "lapLabel": "Vuelta",
+    "lapsHeader": "Vueltas",
+    "lapItem": "Vuelta {number}",
+    "@lapItem": {
+        "description": "Etiqueta para el número de vuelta",
+        "placeholders": {
+            "number": {
+                "type": "int"
+            }
+        }
+    },
+    "setDurationPrompt": "Establecer Duración",
+    "editDurationPrompt": "Editar",
+    "hoursShort": "H",
+    "minutesShortForm": "M",
+    "secondsShort": "S",
+    "timerFinishedTitle": "¡Tiempo Terminado!",
+    "timerFinishedMessage": "Tu temporizador ha finalizado.",
+    "timerDurationCannotBeZero": "La duración del temporizador no puede ser cero.",
+    "timerDurationCannotBeZeroWork": "La duración del trabajo no puede ser cero.",
+    "configurePomodoroTitle": "Configurar Intervalos",
+    "workDurationLabel": "Trabajo (min)",
+    "shortBreakDurationLabel": "Descanso Corto (min)",
+    "longBreakDurationLabel": "Descanso Largo (min)",
+    "cyclesBeforeLongBreakLabel": "Ciclos antes de Descanso Largo",
+    "settingsLabel": "Ajustes",
+    "pomodoroSessionWork": "Sesión de Trabajo",
+    "pomodoroSessionShortBreak": "Descanso Corto",
+    "pomodoroSessionLongBreak": "Descanso Largo",
+    "skipIntervalLabel": "Saltar",
+    "pomodoroCycleInfo": "Ciclo {currentCycle} de {totalCycles}",
+    "@pomodoroCycleInfo": {
+        "description": "Información del ciclo Pomodoro actual",
+        "placeholders": {
+            "currentCycle": {
+                "type": "int"
+            },
+            "totalCycles": {
+                "type": "int"
+            }
+        }
+    },
+    "intervalCyclesFinishedTitle": "¡Intervalos Terminados!",
+    "intervalCyclesFinishedMessage": "¡Todos los ciclos de intervalos han terminado!",
+    "pomodoroNextUp": "Siguiente: {intervalName}",
+    "@pomodoroNextUp": {
+        "description": "Etiqueta para el siguiente intervalo Pomodoro",
+        "placeholders": {
+            "intervalName": {
+                "type": "String"
+            }
+        }
+    },
+    "comingSoon": "¡Próximamente!",
+    "calendarTitle": "Calendario",
+    "minutesShort": "min",
+    "selectADay": "Selecciona un día",
+    "noHabitsForThisDay": "No hay hábitos programados para este día.",
+    "selectAnotherDayOrAdd": "Selecciona otro día o añade nuevos hábitos.",
+    "nHabits": "{count,plural, =0{Ningún hábito} =1{1 hábito} other{{count} hábitos}}",
+    "@nHabits": {
+        "description": "Número de hábitos para un día seleccionado",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "example": "3"
+            }
+        }
+    },
+    "noDataAvailable": "Aún no hay vueltas.",
+    "goodMorning": "Buenos días",
+    "goodAfternoon": "Buenas tardes",
+    "goodEvening": "Buenas noches",
+    "passedDaysAgo": "Pasó hace {days}d",
+    "@passedDaysAgo": {
+        "description": "Indica cuántos días hace que pasó un hábito",
+        "placeholders": {
+            "days": {
+                "type": "int"
+            }
+        }
+    },
+    "passedHoursAgo": "Pasó hace {hours}h",
+    "@passedHoursAgo": {
+        "description": "Indica cuántas horas hace que pasó un hábito",
+        "placeholders": {
+            "hours": {
+                "type": "int"
+            }
+        }
+    },
+    "markedAsDone": "marcado como completado",
+    "markedAsNotDone": "marcado como no completado",
+    "markAsDone": "Marcar como completado",
+
+    "created": "Creado",
+    "updated": "Actualizado",
+
+    "viewMyDiary": "Ver Mi Diario",
+    "diaryEntryForDate": "Entrada para {date}",
+    "@diaryEntryForDate": {
+        "description": "Title for a diary entry popup, showing the date",
+        "placeholders": {
+            "date": {
+                "type": "String",
+                "example": "May 15, 2025"
+            }
+        }
+    },
+    "noDiaryEntryForThisDay": "No hay entrada de diario para este día.",
+    "selectAnotherDayOrViewDiary": "Selecciona otro día o revisa tu historial de diario en el calendario.",
+    "diarySaved": "Entrada de diario guardada.",
+    "diaryFor": "Diario para {date}",
+     "@diaryFor": {
+        "description": "Title for the diary screen, showing the current date",
+        "placeholders": {
+            "date": {
+                "type": "String",
+                "example": "May 15, 2025"
+            }
+        }
+    },
+    "emptyDiaryEntryPlaceholder": "Empieza a escribir tu diario de hoy..."
+}

@@ -1,0 +1,52 @@
+name: gabits
+description: "Your routine company."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # UI & Utilidades
+  uuid: ^4.5.1
+  table_calendar: ^3.1.2
+  flutter_slidable: ^3.1.1
+  flutter_colorpicker: ^1.1.0
+  numberpicker: ^2.1.2
+  intl: ^0.20.2
+  flutter_animate: ^4.5.2
+  path_provider: ^2.1.5
+
+  # Editor de Texto (Versiones ajustadas según el solver de Pub)
+  flutter_quill: ^11.0.0
+  flutter_quill_extensions: ^11.0.0
+
+  # Audio
+  flutter_ringtone_player: ^4.0.0
+  audioplayers: ^6.1.0
+
+  # Iconos
+  cupertino_icons: ^1.0.8
+
+  # Isar Community: La solución para Android Gradle Plugin 8+
+  isar_community: ^3.1.0
+  isar_community_flutter_libs: ^3.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+  # Generadores
+  isar_community_generator: ^3.1.0
+  build_runner: ^2.4.13
+
+flutter:
+  uses-material-design: true
+  generate: true
