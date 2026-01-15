@@ -94,7 +94,7 @@ const NoteSchema = CollectionSchema(
   getId: _noteGetId,
   getLinks: _noteGetLinks,
   attach: _noteAttach,
-  version: '3.3.0',
+  version: '3.3.0-dev.1',
 );
 
 int _noteEstimateSize(

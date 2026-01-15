@@ -38,6 +38,10 @@ dependencies:
   isar_community: ^3.1.0
   isar_community_flutter_libs: ^3.1.0
 
+  # State Management
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.3.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -46,6 +50,9 @@ dev_dependencies:
   # Generadores
   isar_community_generator: ^3.1.0
   build_runner: ^2.4.13
+  riverpod_generator: ^2.4.3
+  custom_lint: ^0.7.0
+  riverpod_lint: ^2.3.13
 
 flutter:
   uses-material-design: true

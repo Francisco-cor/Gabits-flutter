@@ -2,11 +2,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:isar_community/isar.dart';
-
+import 'package:flutter/services.dart';
 import 'package:gabits/habits_screen.dart';
 import 'package:gabits/notes_screen.dart';
 import 'package:gabits/diary_screen.dart';
@@ -14,24 +14,24 @@ import 'package:gabits/new_habit_screen.dart';
 import 'package:gabits/new_note_screen.dart';
 import 'package:gabits/calendar_screen.dart';
 import 'package:gabits/timer_screen.dart';
-
 import 'package:gabits/generated/l10n/app_localizations.dart';
 import 'package:gabits/models/habit_model.dart';
 import 'package:gabits/models/note_model.dart';
 import 'package:gabits/models/diary_entry_model.dart';
 import 'package:gabits/services/database_service.dart';
 import 'package:gabits/theme/app_theme.dart';
+import 'package:gabits/providers/habits_provider.dart';
+import 'package:isar_community/isar.dart';
 
-class MyHomePage extends StatefulWidget {
+class MyHomePage extends ConsumerStatefulWidget {
   const MyHomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  ConsumerState<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  List<Habit> _allHabits = [];
-  List<Habit> _dailyRoutineHabits = [];
+class _MyHomePageState extends ConsumerState<MyHomePage>
+    with TickerProviderStateMixin {
   List<DiaryEntry> _allDiaryEntries = [];
   Timer? _updateTimer;
   String _currentDate = '';
@@ -39,6 +39,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   OverlayEntry? _fabMenuOverlayEntry;
   final LayerLink _fabLayerLink = LayerLink();
   late AnimationController _fabIconAnimationController;
+  Id? _habitIdInRewardState;
+  Timer? _rewardTimer;
 
   @override
   void initState() {
@@ -47,35 +49,20 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _loadInitialDataFromIsar();
+    _loadInitialDiaryEntries();
     _updateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
-        _updateCurrentDateAndRoutine();
+        _updateCurrentDate();
       }
     });
-  }
-
-  Future<void> _loadInitialDataFromIsar() async {
-    await _loadInitialHabits();
-    await _loadInitialDiaryEntries();
-    if (mounted) {
-      _filterAndUpdateDailyRoutine();
-      setState(() {});
-    }
-  }
-
-  Future<void> _loadInitialHabits() async {
-    final habitsFromDb = await isar.habits.where().findAll();
-    if (mounted) {
-      _allHabits = habitsFromDb;
-      // YA NO SE CREAN HÁBITOS POR DEFECTO
-    }
   }
 
   Future<void> _loadInitialDiaryEntries() async {
     final entriesFromDb = await isar.diaryEntrys.where().findAll();
     if (mounted) {
-      _allDiaryEntries = entriesFromDb;
+      setState(() {
+        _allDiaryEntries = entriesFromDb;
+      });
     }
   }
 
@@ -83,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (mounted) {
-      _updateCurrentDateAndRoutine();
+      _updateCurrentDate();
     }
   }
 
@@ -91,28 +78,18 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   void dispose() {
     _closeFabMenu();
     _updateTimer?.cancel();
+    _rewardTimer?.cancel();
     _fabIconAnimationController.dispose();
     super.dispose();
   }
 
-  void _updateCurrentDateAndRoutine() {
+  void _updateCurrentDate() {
     final locale = Localizations.localeOf(context).toString();
     final newDateString = DateFormat.yMMMMd(locale).format(DateTime.now());
-    bool dateChanged = _currentDate != newDateString;
-
-    final List<Habit> oldDailyRoutineHabits = List.from(_dailyRoutineHabits);
-
-    if (dateChanged) {
-      _currentDate = newDateString;
-      _filterAndUpdateDailyRoutine();
-    } else {
-      _filterAndUpdateDailyRoutine();
-    }
-
-    if (!listEquals(oldDailyRoutineHabits, _dailyRoutineHabits)) {
-      if (mounted) {
-        setState(() {});
-      }
+    if (_currentDate != newDateString) {
+      setState(() {
+        _currentDate = newDateString;
+      });
     }
   }
 
@@ -154,67 +131,25 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return localizations.startsNowStatus;
   }
 
-  void _filterAndUpdateDailyRoutine() {
-    final now = DateTime.now();
-    final int dayIndexForSchedule = now.weekday - 1;
-
-    _dailyRoutineHabits = _allHabits.where((h) {
-      return h.scheduleDays.contains(dayIndexForSchedule);
-    }).toList()
-      ..sort((a, b) {
-        final aDT = DateTime(0, 0, 0, a.startTime.hour, a.startTime.minute);
-        final bDT = DateTime(0, 0, 0, b.startTime.hour, b.startTime.minute);
-        int comp = aDT.compareTo(bDT);
-        return comp != 0
-            ? comp
-            : a.name.toLowerCase().compareTo(b.name.toLowerCase());
-      });
-  }
-
-  Future<void> _addHabit(Habit h) async {
-    await isar.writeTxn(() async {
-      await isar.habits.put(h);
-    });
-    if (mounted) {
-      await _loadInitialHabits();
-      _filterAndUpdateDailyRoutine();
-      setState(() {});
-    }
-  }
-
-  Future<void> _updateHabit(Habit updatedHabit, Habit oldHabit) async {
-    updatedHabit.id = oldHabit.id;
-    await isar.writeTxn(() async {
-      await isar.habits.put(updatedHabit);
-    });
-    if (mounted) {
-      await _loadInitialHabits();
-      _filterAndUpdateDailyRoutine();
-      setState(() {});
-    }
-  }
-
-  Future<void> _deleteHabit(Habit d) async {
-    await isar.writeTxn(() async {
-      await isar.habits.delete(d.id);
-    });
-    if (mounted) {
-      await _loadInitialHabits();
-      _filterAndUpdateDailyRoutine();
-      setState(() {});
-    }
-  }
-
   Future<void> _toggleHabitCompleted(Habit t) async {
     final updatedHabit = t.copyWith(isCompleted: !t.isCompleted);
-    await isar.writeTxn(() async {
-      await isar.habits.put(updatedHabit);
-    });
-    if (mounted) {
-      final indexAll = _allHabits.indexWhere((h) => h.id == t.id);
-      if (indexAll != -1) _allHabits[indexAll] = updatedHabit;
-      _filterAndUpdateDailyRoutine();
-      setState(() {});
+    await ref.read(habitsNotifierProvider.notifier).updateHabit(updatedHabit);
+
+    if (updatedHabit.isCompleted) {
+      HapticFeedback.mediumImpact();
+      _rewardTimer?.cancel();
+      setState(() => _habitIdInRewardState = updatedHabit.id);
+      _rewardTimer = Timer(const Duration(milliseconds: 2500), () {
+        if (mounted) {
+          setState(() => _habitIdInRewardState = null);
+        }
+      });
+    } else {
+      HapticFeedback.lightImpact();
+      if (_habitIdInRewardState == t.id) {
+        _rewardTimer?.cancel();
+        setState(() => _habitIdInRewardState = null);
+      }
     }
   }
 
@@ -222,10 +157,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     await isar.writeTxn(() async {
       await isar.diaryEntrys.put(entry);
     });
-    if (mounted) {
-      await _loadInitialDiaryEntries();
-      setState(() {});
-    }
+    await _loadInitialDiaryEntries();
   }
 
   DiaryEntry? _getDiaryEntryForDate(DateTime date) {
@@ -327,7 +259,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               .push<Habit>(
                   MaterialPageRoute(builder: (c) => const NewHabitScreen()));
           if (nH != null) {
-            await _addHabit(nH);
+            await ref.read(habitsNotifierProvider.notifier).addHabit(nH);
           }
         }
       },
@@ -389,33 +321,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-    final Color greetingIconColor = theme.iconTheme.color?.withOpacity(0.8) ??
-        AppTheme.primaryAppColor.withOpacity(0.8);
-    final Color noHabitsIconColor =
-        theme.colorScheme.secondary.withOpacity(0.6);
-    final Color noHabitsTextColor =
-        theme.colorScheme.onBackground.withOpacity(0.7);
-    final Color cardStripeColorCompleted = Colors.grey.shade400;
-    final Color cardTextColorCompleted =
-        theme.colorScheme.onSurface.withOpacity(0.55);
-    final Color remainingTimePassedColor = Colors.red.shade400.withOpacity(0.8);
-    final Color remainingTimeStartsNowColor =
-        theme.colorScheme.secondary.withOpacity(0.9);
-    final Color checkIconCompletedColor = Colors.green.shade500;
-    final Color checkIconNotCompletedColor =
-        theme.colorScheme.secondary.withOpacity(0.85);
-    final Color topButtonSplashColor =
-        theme.colorScheme.secondary.withOpacity(0.1);
-    final Color topButtonHighlightColor =
-        theme.colorScheme.primary.withOpacity(0.05);
-    final Color topButtonTextColor =
-        theme.colorScheme.onBackground.withOpacity(0.9);
+    final habitsAsync = ref.watch(habitsNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(_getGreetingIcon(), color: greetingIconColor, size: 28),
+            Icon(_getGreetingIcon(),
+                color: theme.colorScheme.primary.withOpacity(0.8), size: 28),
             const SizedBox(width: 10),
             Text(_getGreeting(context),
                 style: theme.appBarTheme.titleTextStyle),
@@ -425,11 +338,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           IconButton(
             icon: const Icon(Icons.calendar_month_outlined),
             tooltip: localizations.calendarTitle,
-            onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        CalendarScreen(allHabits: _allHabits))),
+            onPressed: () {
+              habitsAsync.whenData((allHabits) {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            CalendarScreen(allHabits: allHabits)));
+              });
+            },
           )
               .animate()
               .fadeIn(delay: 200.ms, duration: 400.ms)
@@ -461,19 +378,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => HabitsScreen(
-                                allHabits: _allHabits,
-                                onUpdateHabit: _updateHabit,
-                                onDeleteHabit: _deleteHabit,
-                                onAddHabit: _addHabit,
-                              ))).then((_) {
-                    if (mounted) {
-                      _loadInitialDataFromIsar();
-                    }
-                  }),
-                  splashColor: topButtonSplashColor,
-                  highlightColor: topButtonHighlightColor,
-                  textColor: topButtonTextColor,
+                          builder: (context) => const HabitsScreen())),
+                  splashColor: theme.colorScheme.secondary.withOpacity(0.1),
+                  highlightColor: theme.colorScheme.primary.withOpacity(0.05),
+                  textColor: theme.colorScheme.onBackground.withOpacity(0.9),
                 )
                     .animate()
                     .fadeIn(delay: 400.ms, duration: 500.ms)
@@ -486,9 +394,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       context,
                       MaterialPageRoute(
                           builder: (context) => const NotesScreen())),
-                  splashColor: topButtonSplashColor,
-                  highlightColor: topButtonHighlightColor,
-                  textColor: topButtonTextColor,
+                  splashColor: theme.colorScheme.secondary.withOpacity(0.1),
+                  highlightColor: theme.colorScheme.primary.withOpacity(0.05),
+                  textColor: theme.colorScheme.onBackground.withOpacity(0.9),
                 )
                     .animate()
                     .fadeIn(delay: 500.ms, duration: 500.ms)
@@ -510,13 +418,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                             allDiaryEntries: _allDiaryEntries,
                             getDiaryEntryForDate: _getDiaryEntryForDate,
                           ),
-                        )).then((_) {
-                      if (mounted) _loadInitialDiaryEntries();
-                    });
+                        ));
                   },
-                  splashColor: topButtonSplashColor,
-                  highlightColor: topButtonHighlightColor,
-                  textColor: topButtonTextColor,
+                  splashColor: theme.colorScheme.secondary.withOpacity(0.1),
+                  highlightColor: theme.colorScheme.primary.withOpacity(0.05),
+                  textColor: theme.colorScheme.onBackground.withOpacity(0.9),
                 )
                     .animate()
                     .fadeIn(delay: 600.ms, duration: 500.ms)
@@ -537,266 +443,42 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             ).animate().fadeIn(delay: 700.ms, duration: 400.ms),
           ),
           Expanded(
-            child: _dailyRoutineHabits.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.space_dashboard_outlined,
-                              size: 72, color: noHabitsIconColor),
-                          const SizedBox(height: 24),
-                          Text(
-                            localizations.noHabitsToday,
-                            style: TextStyle(
-                                fontSize: 19,
-                                fontWeight: FontWeight.w500,
-                                color: noHabitsTextColor),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            localizations.tapPlusToAddHabit,
-                            style: TextStyle(
-                                fontSize: 15,
-                                color: theme.colorScheme.onSurfaceVariant,
-                                height: 1.4),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ).animate().fadeIn(delay: 200.ms, duration: 500.ms).scaleXY(
-                        begin: 0.9, end: 1.0, curve: Curves.elasticOut),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0)
-                        .copyWith(bottom: 90.0, top: 4.0),
-                    itemCount: _dailyRoutineHabits.length,
-                    itemBuilder: (context, index) {
-                      final habit = _dailyRoutineHabits[index];
-                      final String formattedTime =
-                          habit.startTime.format(context);
+            child: habitsAsync.when(
+              data: (allHabits) {
+                final now = DateTime.now();
+                final int dayIndexForSchedule = now.weekday - 1;
 
-                      final now = DateTime.now();
-                      final habitDateTimeToday = DateTime(
-                          now.year,
-                          now.month,
-                          now.day,
-                          habit.startTime.hour,
-                          habit.startTime.minute);
-                      final Duration differenceToNow =
-                          habitDateTimeToday.difference(now);
-                      bool isPassed =
-                          differenceToNow.isNegative && !habit.isCompleted;
+                final dailyRoutineHabits = allHabits.where((h) {
+                  return h.scheduleDays.contains(dayIndexForSchedule);
+                }).toList()
+                  ..sort((a, b) {
+                    final aDT =
+                        DateTime(0, 0, 0, a.startTime.hour, a.startTime.minute);
+                    final bDT =
+                        DateTime(0, 0, 0, b.startTime.hour, b.startTime.minute);
+                    int comp = aDT.compareTo(bDT);
+                    return comp != 0
+                        ? comp
+                        : a.name.toLowerCase().compareTo(b.name.toLowerCase());
+                  });
 
-                      final String remainingTimeText =
-                          _getRemainingTime(habit.startTime, localizations);
-                      bool startsNow =
-                          remainingTimeText == localizations.startsNowStatus &&
-                              !habit.isCompleted;
+                if (dailyRoutineHabits.isEmpty) {
+                  return _buildEmptyState(localizations, theme);
+                }
 
-                      Color currentCardStripeColor;
-                      Color currentCardTextColor = theme.colorScheme.onSurface;
-                      TextDecoration cardTextDecoration = TextDecoration.none;
-                      Color detailIconsColor =
-                          theme.iconTheme.color?.withOpacity(0.7) ??
-                              theme.colorScheme.onSurfaceVariant;
-
-                      if (habit.isCompleted) {
-                        currentCardStripeColor = cardStripeColorCompleted;
-                        currentCardTextColor = cardTextColorCompleted;
-                        cardTextDecoration = TextDecoration.lineThrough;
-                        detailIconsColor =
-                            currentCardTextColor.withOpacity(0.8);
-                      } else {
-                        currentCardStripeColor = habit.color;
-                        if (isPassed) {
-                          detailIconsColor =
-                              theme.colorScheme.onSurface.withOpacity(0.75);
-                        }
-                      }
-
-                      BorderRadius cardBorderRadius =
-                          BorderRadius.circular(16.0);
-                      final cardShape = theme.cardTheme.shape;
-                      if (cardShape is RoundedRectangleBorder) {
-                        final resolvedShape = cardShape.borderRadius
-                            .resolve(Directionality.of(context));
-                        if (resolvedShape is BorderRadius) {
-                          cardBorderRadius = resolvedShape;
-                        }
-                      }
-
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 6.0),
-                        child: IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Container(
-                                width: 10.0,
-                                decoration: BoxDecoration(
-                                  color: currentCardStripeColor,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: cardBorderRadius.topLeft,
-                                    bottomLeft: cardBorderRadius.bottomLeft,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0, vertical: 14.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        habit.name,
-                                        style: TextStyle(
-                                          fontSize: 17.5,
-                                          fontWeight: FontWeight.w600,
-                                          color: currentCardTextColor,
-                                          decoration: cardTextDecoration,
-                                          decorationColor: currentCardTextColor
-                                              .withOpacity(0.8),
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          Icon(Icons.schedule_rounded,
-                                              size: 17,
-                                              color: detailIconsColor),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            '${localizations.today} $formattedTime',
-                                            style: TextStyle(
-                                              fontSize: 14.5,
-                                              fontWeight: FontWeight.w500,
-                                              color: currentCardTextColor
-                                                  .withOpacity(0.9),
-                                              decoration: cardTextDecoration,
-                                              decorationColor:
-                                                  currentCardTextColor
-                                                      .withOpacity(0.8),
-                                            ),
-                                          ),
-                                          const Spacer(),
-                                          if (!habit.isCompleted)
-                                            Text(
-                                              remainingTimeText,
-                                              style: TextStyle(
-                                                  fontSize: 14.5,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: isPassed
-                                                      ? remainingTimePassedColor
-                                                      : (startsNow
-                                                          ? remainingTimeStartsNowColor
-                                                          : Colors
-                                                              .green.shade600)),
-                                            ),
-                                        ],
-                                      ),
-                                      if (habit.goalType != GoalType.yesNo &&
-                                          habit.goalValue != null &&
-                                          habit.goalValue! > 0)
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 7.0),
-                                          child: Row(
-                                            children: [
-                                              Icon(
-                                                  habit.goalType ==
-                                                          GoalType.time
-                                                      ? Icons.timer_outlined
-                                                      : Icons
-                                                          .format_list_numbered_rounded,
-                                                  size: 16,
-                                                  color: detailIconsColor),
-                                              const SizedBox(width: 6.0),
-                                              Text(
-                                                '${habit.goalType == GoalType.time ? localizations.goalTypeTime : localizations.goalTypeQuantity}: ${habit.goalValue?.toStringAsFixed(0) ?? ""}${habit.goalType == GoalType.time ? " ${localizations.minutesShort}" : ""}',
-                                                style: TextStyle(
-                                                  fontSize: 13.5,
-                                                  fontStyle: FontStyle.italic,
-                                                  color: currentCardTextColor
-                                                      .withOpacity(0.8),
-                                                  decoration:
-                                                      cardTextDecoration,
-                                                  decorationColor:
-                                                      currentCardTextColor
-                                                          .withOpacity(0.8),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              if (habit.goalType == GoalType.yesNo &&
-                                  (!isPassed || habit.isCompleted))
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 8.0),
-                                  child: Tooltip(
-                                    message: habit.isCompleted
-                                        ? localizations.done
-                                        : localizations.markAsDone,
-                                    child: IconButton(
-                                      icon: Icon(
-                                        habit.isCompleted
-                                            ? Icons.check_circle_rounded
-                                            : Icons
-                                                .check_circle_outline_rounded,
-                                        color: habit.isCompleted
-                                            ? checkIconCompletedColor
-                                            : checkIconNotCompletedColor,
-                                        size: 28,
-                                      ),
-                                      onPressed: () async {
-                                        final String habitNameForSnackbar =
-                                            habit.name;
-                                        final bool wasCompleted =
-                                            habit.isCompleted;
-
-                                        await _toggleHabitCompleted(habit);
-
-                                        if (mounted) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(SnackBar(
-                                            content: Text(
-                                                '$habitNameForSnackbar ${!wasCompleted ? localizations.markedAsDone : localizations.markedAsNotDone}'),
-                                            backgroundColor: !wasCompleted
-                                                ? Colors.green.shade600
-                                                : theme.colorScheme.primary,
-                                            behavior: SnackBarBehavior.floating,
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10)),
-                                            margin: const EdgeInsets.fromLTRB(
-                                                15, 5, 15, 10),
-                                          ));
-                                        }
-                                      },
-                                      splashRadius: 24.0,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      )
-                          .animate()
-                          .fadeIn(duration: 350.ms, delay: (index * 70).ms)
-                          .slideX(begin: 0.05, curve: Curves.easeOutCubic);
-                    },
-                  ),
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0)
+                      .copyWith(bottom: 90.0, top: 4.0),
+                  itemCount: dailyRoutineHabits.length,
+                  itemBuilder: (context, index) {
+                    final habit = dailyRoutineHabits[index];
+                    return _buildHabitCard(habit, localizations, theme, index);
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(child: Text('Error: $err')),
+            ),
           ),
         ],
       ),
@@ -830,6 +512,253 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildEmptyState(AppLocalizations localizations, ThemeData theme) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.space_dashboard_outlined,
+                size: 72, color: theme.colorScheme.secondary.withOpacity(0.6)),
+            const SizedBox(height: 24),
+            Text(
+              localizations.noHabitsToday,
+              style: TextStyle(
+                  fontSize: 19,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onBackground.withOpacity(0.7)),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              localizations.tapPlusToAddHabit,
+              style: TextStyle(
+                  fontSize: 15,
+                  color: theme.colorScheme.onSurfaceVariant,
+                  height: 1.4),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      )
+          .animate()
+          .fadeIn(delay: 200.ms, duration: 500.ms)
+          .scaleXY(begin: 0.9, end: 1.0, curve: Curves.elasticOut),
+    );
+  }
+
+  Widget _buildHabitCard(
+      Habit habit, AppLocalizations localizations, ThemeData theme, int index) {
+    final String formattedTime = habit.startTime.format(context);
+    final now = DateTime.now();
+    final habitDateTimeToday = DateTime(now.year, now.month, now.day,
+        habit.startTime.hour, habit.startTime.minute);
+    final Duration differenceToNow = habitDateTimeToday.difference(now);
+    bool isPassed = differenceToNow.isNegative && !habit.isCompleted;
+    final String remainingTimeText =
+        _getRemainingTime(habit.startTime, localizations);
+    bool startsNow = remainingTimeText == localizations.startsNowStatus &&
+        !habit.isCompleted;
+
+    Color currentCardStripeColor =
+        habit.isCompleted ? Colors.grey.shade400 : habit.color;
+    Color currentCardTextColor = habit.isCompleted
+        ? theme.colorScheme.onSurface.withOpacity(0.55)
+        : theme.colorScheme.onSurface;
+    TextDecoration cardTextDecoration =
+        habit.isCompleted ? TextDecoration.lineThrough : TextDecoration.none;
+    Color detailIconsColor = habit.isCompleted
+        ? currentCardTextColor.withOpacity(0.8)
+        : (isPassed
+            ? theme.colorScheme.onSurface.withOpacity(0.75)
+            : theme.colorScheme.onSurfaceVariant);
+
+    BorderRadius cardBorderRadius = BorderRadius.circular(16.0);
+    final cardShape = theme.cardTheme.shape;
+    if (cardShape is RoundedRectangleBorder) {
+      final resolvedShape =
+          cardShape.borderRadius.resolve(Directionality.of(context));
+      if (resolvedShape is BorderRadius) cardBorderRadius = resolvedShape;
+    }
+
+    final bool isShowingReward = _habitIdInRewardState == habit.id;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6.0),
+      clipBehavior: Clip.antiAlias,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 400),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(
+                  scale:
+                      Tween<double>(begin: 0.95, end: 1.0).animate(animation),
+                  child: child));
+        },
+        child: isShowingReward
+            ? Container(
+                key: const ValueKey('reward'),
+                color: Colors.green.shade600,
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    const Icon(Icons.stars_rounded,
+                            color: Colors.white, size: 32)
+                        .animate()
+                        .scale(duration: 600.ms, curve: Curves.elasticOut)
+                        .rotate(begin: -0.2, end: 0),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('¡Excelente trabajo!',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16)),
+                          Text('${habit.name} ${localizations.markedAsDone}',
+                              style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 14)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : IntrinsicHeight(
+                key: const ValueKey('content'),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      width: 10.0,
+                      decoration: BoxDecoration(
+                        color: currentCardStripeColor,
+                        borderRadius: BorderRadius.only(
+                            topLeft: cardBorderRadius.topLeft,
+                            bottomLeft: cardBorderRadius.bottomLeft),
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 14.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(habit.name,
+                                style: TextStyle(
+                                    fontSize: 17.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: currentCardTextColor,
+                                    decoration: cardTextDecoration,
+                                    decorationColor:
+                                        currentCardTextColor.withOpacity(0.8)),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(Icons.schedule_rounded,
+                                    size: 17, color: detailIconsColor),
+                                const SizedBox(width: 6),
+                                Text('${localizations.today} $formattedTime',
+                                    style: TextStyle(
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.w500,
+                                        color: currentCardTextColor
+                                            .withOpacity(0.9),
+                                        decoration: cardTextDecoration,
+                                        decorationColor: currentCardTextColor
+                                            .withOpacity(0.8))),
+                                const Spacer(),
+                                if (!habit.isCompleted)
+                                  Text(remainingTimeText,
+                                      style: TextStyle(
+                                          fontSize: 14.5,
+                                          fontWeight: FontWeight.w500,
+                                          color: isPassed
+                                              ? Colors.red.shade400
+                                                  .withOpacity(0.8)
+                                              : (startsNow
+                                                  ? theme.colorScheme.secondary
+                                                      .withOpacity(0.9)
+                                                  : Colors.green.shade600))),
+                              ],
+                            ),
+                            if (habit.goalType != GoalType.yesNo &&
+                                habit.goalValue != null &&
+                                habit.goalValue! > 0)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 7.0),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                        habit.goalType == GoalType.time
+                                            ? Icons.timer_outlined
+                                            : Icons
+                                                .format_list_numbered_rounded,
+                                        size: 16,
+                                        color: detailIconsColor),
+                                    const SizedBox(width: 6.0),
+                                    Text(
+                                      '${habit.goalType == GoalType.time ? localizations.goalTypeTime : localizations.goalTypeQuantity}: ${habit.goalValue?.toStringAsFixed(0) ?? ""}${habit.goalType == GoalType.time ? " ${localizations.minutesShort}" : ""}',
+                                      style: TextStyle(
+                                          fontSize: 13.5,
+                                          fontStyle: FontStyle.italic,
+                                          color: currentCardTextColor
+                                              .withOpacity(0.8),
+                                          decoration: cardTextDecoration,
+                                          decorationColor: currentCardTextColor
+                                              .withOpacity(0.8)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (habit.goalType == GoalType.yesNo &&
+                        (!isPassed || habit.isCompleted))
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Tooltip(
+                          message: habit.isCompleted
+                              ? localizations.done
+                              : localizations.markAsDone,
+                          child: IconButton(
+                            icon: Icon(
+                              habit.isCompleted
+                                  ? Icons.check_circle_rounded
+                                  : Icons.check_circle_outline_rounded,
+                              color: habit.isCompleted
+                                  ? Colors.green.shade500
+                                  : theme.colorScheme.secondary
+                                      .withOpacity(0.85),
+                              size: 28,
+                            ),
+                            onPressed: () => _toggleHabitCompleted(habit),
+                            splashRadius: 24.0,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+      ),
+    )
+        .animate()
+        .fadeIn(duration: 350.ms, delay: (index * 70).ms)
+        .slideX(begin: 0.05, curve: Curves.easeOutCubic);
+  }
+
   Widget _buildTopButton({
     required BuildContext context,
     required IconData icon,
@@ -853,16 +782,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             children: <Widget>[
               Icon(icon, size: 30.0, color: theme.colorScheme.primary),
               const SizedBox(height: 10.0),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w500,
-                    color: textColor),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Text(label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                      color: textColor),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
         ),

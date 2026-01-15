@@ -1,42 +1,28 @@
 // lib/habits_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gabits/generated/l10n/app_localizations.dart';
 import 'package:gabits/new_habit_screen.dart';
 import 'package:gabits/models/habit_model.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:isar_community/isar.dart'; // Necesario para el tipo Id
+import 'package:gabits/providers/habits_provider.dart';
+import 'package:isar_community/isar.dart';
 
-class HabitsScreen extends StatefulWidget {
-  final List<Habit> allHabits; // Esta lista es la que se pasa desde main.dart
-  final Future<void> Function(Habit updatedHabit, Habit oldHabit) onUpdateHabit;
-  final Future<void> Function(Habit habitToDelete) onDeleteHabit;
-  final Future<void> Function(Habit newHabit) onAddHabit;
-
-  const HabitsScreen({
-    super.key,
-    required this.allHabits,
-    required this.onUpdateHabit,
-    required this.onDeleteHabit,
-    required this.onAddHabit,
-  });
+class HabitsScreen extends ConsumerStatefulWidget {
+  const HabitsScreen({super.key});
 
   @override
-  State<HabitsScreen> createState() => _HabitsScreenState();
+  ConsumerState<HabitsScreen> createState() => _HabitsScreenState();
 }
 
-class _HabitsScreenState extends State<HabitsScreen> with SingleTickerProviderStateMixin {
+class _HabitsScreenState extends ConsumerState<HabitsScreen>
+    with SingleTickerProviderStateMixin {
   Id? _habitIdWithOptionsOpen;
   late AnimationController _screenEntryAnimationController;
-
-  // Lista de estado local para manejar los hábitos dentro de esta pantalla
-  late List<Habit> _currentHabits;
 
   @override
   void initState() {
     super.initState();
-    // Inicializa la lista local con una copia de los hábitos pasados
-    _currentHabits = List.from(widget.allHabits);
-
     _screenEntryAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 450),
@@ -58,34 +44,31 @@ class _HabitsScreenState extends State<HabitsScreen> with SingleTickerProviderSt
   void _navigateToEditHabit(Habit habitToEdit) async {
     final Habit? updatedHabit = await Navigator.push<Habit>(
       context,
-      MaterialPageRoute(builder: (context) => NewHabitScreen(habitToEdit: habitToEdit)),
+      MaterialPageRoute(
+          builder: (context) => NewHabitScreen(habitToEdit: habitToEdit)),
     );
     if (updatedHabit != null && mounted) {
-      // Llama al callback de MyHomePage para actualizar en Isar y en la lista _allHabits de MyHomePage
-      await widget.onUpdateHabit(updatedHabit, habitToEdit);
-
-      // Actualiza la lista local _currentHabits en HabitsScreen
-      final index = _currentHabits.indexWhere((h) => h.id == habitToEdit.id);
-      if (index != -1 && mounted) {
+      await ref.read(habitsNotifierProvider.notifier).updateHabit(updatedHabit);
+      if (_habitIdWithOptionsOpen == habitToEdit.id) {
         setState(() {
-          _currentHabits[index] = updatedHabit; // Actualiza el hábito en la lista local
-          if (_habitIdWithOptionsOpen == habitToEdit.id) {
-            _habitIdWithOptionsOpen = null;
-          }
+          _habitIdWithOptionsOpen = null;
         });
       }
     }
   }
 
-  void _confirmDeleteHabit(Habit habitToDelete, AppLocalizations localizations) {
+  void _confirmDeleteHabit(
+      Habit habitToDelete, AppLocalizations localizations) {
     final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(localizations.confirmDeleteTitle),
-        content: Text(localizations.confirmDeleteMessage.replaceAll('%s', habitToDelete.name)),
+        content: Text(localizations.confirmDeleteMessage
+            .replaceAll('%s', habitToDelete.name)),
         actionsAlignment: MainAxisAlignment.spaceBetween,
-        actionsPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        actionsPadding:
+            const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         actions: <Widget>[
           TextButton(
             child: Text(localizations.cancel),
@@ -97,16 +80,13 @@ class _HabitsScreenState extends State<HabitsScreen> with SingleTickerProviderSt
             ),
             child: Text(localizations.deleteButtonLabel),
             onPressed: () async {
-              Navigator.of(ctx).pop(); // Cerrar el diálogo primero
-              // Llama al callback de MyHomePage
-              await widget.onDeleteHabit(habitToDelete);
-              // Actualiza la lista local _currentHabits en HabitsScreen
-              if (mounted) {
+              Navigator.of(ctx).pop();
+              await ref
+                  .read(habitsNotifierProvider.notifier)
+                  .deleteHabit(habitToDelete.id);
+              if (_habitIdWithOptionsOpen == habitToDelete.id) {
                 setState(() {
-                  _currentHabits.removeWhere((h) => h.id == habitToDelete.id);
-                  if (_habitIdWithOptionsOpen == habitToDelete.id) {
-                    _habitIdWithOptionsOpen = null;
-                  }
+                  _habitIdWithOptionsOpen = null;
                 });
               }
             },
@@ -116,17 +96,26 @@ class _HabitsScreenState extends State<HabitsScreen> with SingleTickerProviderSt
     );
   }
 
-  void _showHabitDetailsPopup(Habit habit, AppLocalizations localizations, ThemeData theme) {
+  void _showHabitDetailsPopup(
+      Habit habit, AppLocalizations localizations, ThemeData theme) {
     List<String> dayChars = habit.scheduleDays.map((dayIndex) {
       switch (dayIndex) {
-        case 0: return localizations.sundayShort;
-        case 1: return localizations.mondayShort;
-        case 2: return localizations.tuesdayShort;
-        case 3: return localizations.wednesdayShort;
-        case 4: return localizations.thursdayShort;
-        case 5: return localizations.fridayShort;
-        case 6: return localizations.saturdayShort;
-        default: return '';
+        case 0:
+          return localizations.sundayShort;
+        case 1:
+          return localizations.mondayShort;
+        case 2:
+          return localizations.tuesdayShort;
+        case 3:
+          return localizations.wednesdayShort;
+        case 4:
+          return localizations.thursdayShort;
+        case 5:
+          return localizations.fridayShort;
+        case 6:
+          return localizations.saturdayShort;
+        default:
+          return '';
       }
     }).toList();
     String scheduleString = dayChars.join(', ');
@@ -137,35 +126,42 @@ class _HabitsScreenState extends State<HabitsScreen> with SingleTickerProviderSt
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+        insetPadding:
+            const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
         titlePadding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 0.0),
         contentPadding: const EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 16.0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
         title: Row(
           children: [
             Container(
-              width: 10, height: 20,
+              width: 10,
+              height: 20,
               decoration: BoxDecoration(
-                  color: habit.color,
-                  borderRadius: BorderRadius.circular(4)
-              ),
+                  color: habit.color, borderRadius: BorderRadius.circular(4)),
             ),
             const SizedBox(width: 12),
-            Expanded(child: Text(habit.name, style: theme.dialogTheme.titleTextStyle)),
+            Expanded(
+                child:
+                    Text(habit.name, style: theme.dialogTheme.titleTextStyle)),
           ],
         ),
         content: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.5),
+          constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.5),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const SizedBox(height: 8),
-                if (habit.description != null && habit.description!.isNotEmpty) ...[
+                if (habit.description != null &&
+                    habit.description!.isNotEmpty) ...[
                   Text(
                     habit.description!,
-                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.75), height: 1.4),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.75),
+                        height: 1.4),
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -182,12 +178,17 @@ class _HabitsScreenState extends State<HabitsScreen> with SingleTickerProviderSt
                     text: scheduleString,
                   ),
                 ],
-                if (habit.goalType != GoalType.yesNo && habit.goalValue != null && habit.goalValue! > 0) ...[
+                if (habit.goalType != GoalType.yesNo &&
+                    habit.goalValue != null &&
+                    habit.goalValue! > 0) ...[
                   const SizedBox(height: 10),
                   _buildDetailRow(
                     theme,
-                    icon: habit.goalType == GoalType.time ? Icons.timer_outlined : Icons.format_list_numbered_rtl_rounded,
-                    text: '${habit.goalType == GoalType.time ? localizations.goalTypeTime : localizations.goalTypeQuantity}: ${habit.goalValue?.toStringAsFixed(0)}${habit.goalType == GoalType.time ? " ${localizations.minutesShort}" : ""}',
+                    icon: habit.goalType == GoalType.time
+                        ? Icons.timer_outlined
+                        : Icons.format_list_numbered_rtl_rounded,
+                    text:
+                        '${habit.goalType == GoalType.time ? localizations.goalTypeTime : localizations.goalTypeQuantity}: ${habit.goalValue?.toStringAsFixed(0)}${habit.goalType == GoalType.time ? " ${localizations.minutesShort}" : ""}',
                   ),
                 ],
               ],
@@ -204,16 +205,20 @@ class _HabitsScreenState extends State<HabitsScreen> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildDetailRow(ThemeData theme, {required IconData icon, required String text}) {
+  Widget _buildDetailRow(ThemeData theme,
+      {required IconData icon, required String text}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8)),
+        Icon(icon,
+            size: 18,
+            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.8)),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
             text,
-            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.9)),
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.9)),
           ),
         ),
       ],
@@ -224,27 +229,33 @@ class _HabitsScreenState extends State<HabitsScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
-
-    // Ordena la lista local _currentHabits para la UI
-    final List<Habit> sortedHabits = List.from(_currentHabits);
-    sortedHabits.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-
-    Widget bodyContent;
-    if (sortedHabits.isEmpty) {
-      bodyContent = _buildEmptyState(localizations, theme);
-    } else {
-      // Pasa la lista ordenada (que viene de _currentHabits)
-      bodyContent = _buildHabitsList(sortedHabits, localizations, theme);
-    }
+    final habitsAsync = ref.watch(habitsNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(localizations.myHabits),
       ),
-      body: bodyContent
-          .animate(controller: _screenEntryAnimationController)
-          .slideX(begin: -0.25, end: 0, curve: Curves.easeOutCubic, duration: _screenEntryAnimationController.duration)
-          .fadeIn(duration: _screenEntryAnimationController.duration! * 0.8),
+      body: habitsAsync.when(
+        data: (habits) {
+          final sortedHabits = List<Habit>.from(habits)
+            ..sort(
+                (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+
+          if (sortedHabits.isEmpty) {
+            return _buildEmptyState(localizations, theme)
+                .animate(controller: _screenEntryAnimationController)
+                .slideX(begin: -0.25, end: 0, curve: Curves.easeOutCubic)
+                .fadeIn();
+          }
+
+          return _buildHabitsList(sortedHabits, localizations, theme)
+              .animate(controller: _screenEntryAnimationController)
+              .slideX(begin: -0.25, end: 0, curve: Curves.easeOutCubic)
+              .fadeIn();
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final Habit? newHabit = await Navigator.push<Habit>(
@@ -252,17 +263,7 @@ class _HabitsScreenState extends State<HabitsScreen> with SingleTickerProviderSt
             MaterialPageRoute(builder: (context) => const NewHabitScreen()),
           );
           if (newHabit != null && mounted) {
-            // Llama al callback de MyHomePage.
-            // Isar asignará un ID a newHabit si es autoIncrement.
-            await widget.onAddHabit(newHabit);
-
-            // Actualiza la lista local _currentHabits en HabitsScreen
-            // y reconstruye la UI.
-            if (mounted) {
-              setState(() {
-                _currentHabits.add(newHabit);
-              });
-            }
+            await ref.read(habitsNotifierProvider.notifier).addHabit(newHabit);
           }
         },
         label: Text(localizations.newHabitOption),
@@ -307,49 +308,50 @@ class _HabitsScreenState extends State<HabitsScreen> with SingleTickerProviderSt
     );
   }
 
-  // Este método ahora recibe la lista 'habits' (que será 'sortedHabits' desde el build)
-  Widget _buildHabitsList(List<Habit> habits, AppLocalizations localizations, ThemeData theme) {
-    final cardBaseBorderRadius = (theme.cardTheme.shape as RoundedRectangleBorder?)
-        ?.borderRadius
-        ?.resolve(Directionality.of(context)) ??
-        BorderRadius.circular(16.0);
+  Widget _buildHabitsList(
+      List<Habit> habits, AppLocalizations localizations, ThemeData theme) {
+    final cardBaseBorderRadius =
+        (theme.cardTheme.shape as RoundedRectangleBorder?)
+                ?.borderRadius
+                ?.resolve(Directionality.of(context)) ??
+            BorderRadius.circular(16.0);
 
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 80.0, left: 8.0, right: 8.0),
-      itemCount: habits.length, // Usa la lista 'habits' que se le pasa
+      padding:
+          const EdgeInsets.only(top: 8.0, bottom: 80.0, left: 8.0, right: 8.0),
+      itemCount: habits.length,
       itemBuilder: (context, index) {
-        final habit = habits[index]; // Obtiene el hábito de la lista pasada
+        final habit = habits[index];
         final bool showInlineOptions = _habitIdWithOptionsOpen == habit.id;
 
         String scheduleString = habit.scheduleDays.map((dayIndex) {
           switch (dayIndex) {
-            case 0: return localizations.sundayShort;
-            case 1: return localizations.mondayShort;
-            case 2: return localizations.tuesdayShort;
-            case 3: return localizations.wednesdayShort;
-            case 4: return localizations.thursdayShort;
-            case 5: return localizations.fridayShort;
-            case 6: return localizations.saturdayShort;
-            default: return '';
+            case 0:
+              return localizations.sundayShort;
+            case 1:
+              return localizations.mondayShort;
+            case 2:
+              return localizations.tuesdayShort;
+            case 3:
+              return localizations.wednesdayShort;
+            case 4:
+              return localizations.thursdayShort;
+            case 5:
+              return localizations.fridayShort;
+            case 6:
+              return localizations.saturdayShort;
+            default:
+              return '';
           }
-        }).toList().join(', ');
+        }).join(', ');
 
         if (habit.scheduleDays.length == 7) {
           scheduleString = localizations.everyDay;
         }
 
-        final BorderRadius cardActualBorderRadius = showInlineOptions
-            ? BorderRadius.only(
-          topLeft: cardBaseBorderRadius.topLeft,
-          topRight: cardBaseBorderRadius.topRight,
-          bottomLeft: Radius.zero,
-          bottomRight: Radius.zero,
-        )
-            : cardBaseBorderRadius;
-
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
-          shape: RoundedRectangleBorder(borderRadius: cardActualBorderRadius),
+          shape: RoundedRectangleBorder(borderRadius: cardBaseBorderRadius),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: () {
@@ -365,163 +367,179 @@ class _HabitsScreenState extends State<HabitsScreen> with SingleTickerProviderSt
               });
             },
             borderRadius: cardBaseBorderRadius,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        width: 10.0,
-                        decoration: BoxDecoration(
-                          color: habit.color,
-                          borderRadius: BorderRadius.only(
-                            topLeft: cardBaseBorderRadius.topLeft,
-                            bottomLeft: showInlineOptions ? Radius.zero : cardBaseBorderRadius.bottomLeft,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                habit.name,
-                                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  Icon(Icons.access_time_rounded, size: 16, color: theme.colorScheme.onSurfaceVariant),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    habit.startTime.format(context),
-                                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                                  ),
-                                ],
-                              ),
-                              if (scheduleString.isNotEmpty) ...[
-                                const SizedBox(height: 4),
-                                Row(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                            begin: const Offset(0.0, 0.1), end: Offset.zero)
+                        .animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: showInlineOptions
+                  ? Container(
+                      key: const ValueKey('actions'),
+                      height: 100,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => _navigateToEditHabit(habit),
+                              child: Container(
+                                color: theme.colorScheme.primaryContainer
+                                    .withOpacity(0.4),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.calendar_today_outlined, size: 15, color: theme.colorScheme.onSurfaceVariant),
-                                    const SizedBox(width: 6),
-                                    Expanded(
-                                      child: Text(
-                                        scheduleString,
-                                        style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
+                                    Icon(Icons.edit_rounded,
+                                        color: theme.colorScheme.primary),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      localizations.editButtonLabel,
+                                      style:
+                                          theme.textTheme.labelLarge?.copyWith(
+                                        color: theme.colorScheme.primary,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ],
                                 ),
-                              ],
-                              if (habit.goalType != GoalType.yesNo && habit.goalValue != null && habit.goalValue! > 0) ...[
-                                const SizedBox(height: 4),
-                                Row(
+                              ),
+                            ),
+                          ),
+                          Container(
+                              width: 1,
+                              color: theme.dividerColor.withOpacity(0.1)),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () =>
+                                  _confirmDeleteHabit(habit, localizations),
+                              child: Container(
+                                color: theme.colorScheme.errorContainer
+                                    .withOpacity(0.4),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
-                                        habit.goalType == GoalType.time ? Icons.timer_outlined : Icons.format_list_numbered_rtl_rounded,
-                                        size: 16, color: theme.colorScheme.onSurfaceVariant
-                                    ),
-                                    const SizedBox(width: 6),
+                                    Icon(Icons.delete_outline_rounded,
+                                        color: theme.colorScheme.error),
+                                    const SizedBox(height: 4),
                                     Text(
-                                      '${habit.goalType == GoalType.time ? localizations.goalTypeTime : localizations.goalTypeQuantity}: ${habit.goalValue?.toStringAsFixed(0)}${habit.goalType == GoalType.time ? " ${localizations.minutesShort}" : ""}',
-                                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                                      localizations.deleteButtonLabel,
+                                      style:
+                                          theme.textTheme.labelLarge?.copyWith(
+                                        color: theme.colorScheme.error,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ],
-                            ],
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
-                    return SizeTransition(
-                      sizeFactor: animation,
-                      axisAlignment: -1.0,
-                      child: child,
-                    );
-                  },
-                  child: showInlineOptions
-                      ? Container(
-                    key: ValueKey<Id>(habit.id),
-                    decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerLowest ?? theme.colorScheme.surface.withOpacity(0.5),
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: cardBaseBorderRadius.bottomLeft,
-                          bottomRight: cardBaseBorderRadius.bottomRight,
-                        )
+                    )
+                  : IntrinsicHeight(
+                      key: const ValueKey('info'),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(
+                              width: 10.0,
+                              decoration: BoxDecoration(color: habit.color)),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 14.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(habit.name,
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                              fontWeight: FontWeight.w600),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis),
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.access_time_rounded,
+                                          size: 16,
+                                          color: theme
+                                              .colorScheme.onSurfaceVariant),
+                                      const SizedBox(width: 6),
+                                      Text(habit.startTime.format(context),
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                  color: theme.colorScheme
+                                                      .onSurfaceVariant)),
+                                    ],
+                                  ),
+                                  if (scheduleString.isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.calendar_today_outlined,
+                                            size: 15,
+                                            color: theme
+                                                .colorScheme.onSurfaceVariant),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                            child: Text(scheduleString,
+                                                style: theme
+                                                    .textTheme.bodyMedium
+                                                    ?.copyWith(
+                                                        color: theme.colorScheme
+                                                            .onSurfaceVariant),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1)),
+                                      ],
+                                    ),
+                                  ],
+                                  if (habit.goalType != GoalType.yesNo &&
+                                      habit.goalValue != null &&
+                                      habit.goalValue! > 0) ...[
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Icon(
+                                            habit.goalType == GoalType.time
+                                                ? Icons.timer_outlined
+                                                : Icons
+                                                    .format_list_numbered_rtl_rounded,
+                                            size: 16,
+                                            color: theme
+                                                .colorScheme.onSurfaceVariant),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          '${habit.goalType == GoalType.time ? localizations.goalTypeTime : localizations.goalTypeQuantity}: ${habit.goalValue?.toStringAsFixed(0)}${habit.goalType == GoalType.time ? " ${localizations.minutesShort}" : ""}',
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                  color: theme.colorScheme
+                                                      .onSurfaceVariant),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        _buildInlineOptionButton(
-                          theme,
-                          icon: Icons.edit_outlined,
-                          label: localizations.editButtonLabel,
-                          color: theme.colorScheme.primary,
-                          onTap: () {
-                            _navigateToEditHabit(habit);
-                          },
-                        ),
-                        _buildInlineOptionButton(
-                          theme,
-                          icon: Icons.delete_outline_rounded,
-                          label: localizations.deleteButtonLabel,
-                          color: theme.colorScheme.error,
-                          onTap: () {
-                            _confirmDeleteHabit(habit, localizations);
-                          },
-                        ),
-                      ],
-                    ),
-                  )
-                      : SizedBox.shrink(key: ValueKey<String>("shrink_${habit.id}")),
-                ),
-              ],
             ),
           ),
         )
-            .animate().fadeIn(duration: 300.ms, delay: (index * 50).ms).slideX(begin: 0.05, curve: Curves.easeOutCubic);
+            .animate()
+            .fadeIn(duration: 300.ms, delay: (index * 50).ms)
+            .slideX(begin: 0.05, curve: Curves.easeOutCubic);
       },
-    );
-  }
-
-  Widget _buildInlineOptionButton(ThemeData theme, {required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: const BorderRadius.all(Radius.circular(8.0)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: color, size: 22),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: theme.textTheme.labelMedium?.copyWith(color: color, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

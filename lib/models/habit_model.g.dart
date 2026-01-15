@@ -89,7 +89,7 @@ const HabitSchema = CollectionSchema(
   getId: _habitGetId,
   getLinks: _habitGetLinks,
   attach: _habitAttach,
-  version: '3.3.0',
+  version: '3.3.0-dev.1',
 );
 
 int _habitEstimateSize(
