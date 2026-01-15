@@ -1,34 +1,31 @@
 // lib/diary_screen.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:gabits/utils/quill_utils.dart';
 import 'package:gabits/calendar_diary_screen.dart';
 import 'package:gabits/models/diary_entry_model.dart';
 import 'package:gabits/generated/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:gabits/providers/diary_provider.dart';
 
-class DiaryScreen extends StatefulWidget {
+class DiaryScreen extends ConsumerStatefulWidget {
   final DateTime currentDate;
   final DiaryEntry? initialEntry;
-  final Function(DiaryEntry) onSave;
-  final List<DiaryEntry> allDiaryEntries;
-  final DiaryEntry? Function(DateTime) getDiaryEntryForDate;
 
   const DiaryScreen({
     super.key,
     required this.currentDate,
     this.initialEntry,
-    required this.onSave,
-    required this.allDiaryEntries,
-    required this.getDiaryEntryForDate,
   });
 
   @override
-  State<DiaryScreen> createState() => _DiaryScreenState();
+  ConsumerState<DiaryScreen> createState() => _DiaryScreenState();
 }
 
-class _DiaryScreenState extends State<DiaryScreen> {
+class _DiaryScreenState extends ConsumerState<DiaryScreen> {
   late quill.QuillController _quillController;
   final FocusNode _editorFocusNode = FocusNode();
   final ScrollController _editorScrollController = ScrollController();
@@ -62,7 +59,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
     super.dispose();
   }
 
-  void _saveDiaryEntry() {
+  void _saveDiaryEntry() async {
     final localizations = AppLocalizations.of(context)!;
     final contentJson =
         jsonEncode(_quillController.document.toDelta().toJson());
@@ -79,18 +76,22 @@ class _DiaryScreenState extends State<DiaryScreen> {
         contentJson: contentJson,
       );
     }
-    widget.onSave(entryToSave);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(localizations.diarySaved),
-        backgroundColor: Colors.green.shade600,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.fromLTRB(15, 5, 15, 10),
-      ),
-    );
-    Navigator.pop(context);
+    await ref.read(diaryNotifierProvider.notifier).saveEntry(entryToSave);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(localizations.diarySaved),
+          backgroundColor: Colors.green.shade600,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.fromLTRB(15, 5, 15, 10),
+        ),
+      );
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -100,8 +101,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
     final locale = Localizations.localeOf(context);
     final String formattedDate =
         DateFormat.yMMMMd(locale.toString()).format(widget.currentDate);
-
-    // En v11.5.0, la localización se maneja automáticamente a través del contexto.
+    final diaryAsync = ref.watch(diaryNotifierProvider);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -155,10 +155,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         width: 0.5)),
                 child: Column(
                   children: [
-                    // CORRECCIÓN: controller como parámetro directo y QuillSimpleToolbarConfig
                     quill.QuillSimpleToolbar(
                       controller: _quillController,
-                      config: quill.QuillSimpleToolbarConfig(
+                      config: const quill.QuillSimpleToolbarConfig(
                         showBoldButton: true,
                         showItalicButton: true,
                         showUnderLineButton: true,
@@ -181,7 +180,6 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         thumbVisibility: true,
                         controller: _editorScrollController,
                         child: quill.QuillEditor.basic(
-                          // CORRECCIÓN: Controladores directos en el widget
                           controller: _quillController,
                           focusNode: _editorFocusNode,
                           scrollController: _editorScrollController,
@@ -202,19 +200,30 @@ class _DiaryScreenState extends State<DiaryScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => CalendarDiaryScreen(
-                      allDiaryEntries: widget.allDiaryEntries,
-                      getDiaryEntryForDate: widget.getDiaryEntryForDate,
-                    )),
-          );
-        },
-        label: Text(localizations.viewMyDiary),
-        icon: const Icon(Icons.calendar_month_outlined),
+      floatingActionButton: diaryAsync.maybeWhen(
+        data: (entries) => FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CalendarDiaryScreen(
+                        allDiaryEntries: entries,
+                        getDiaryEntryForDate: (date) {
+                          final normalizedDate = DiaryEntry.normalizeDate(date);
+                          try {
+                            return entries.firstWhere(
+                                (e) => isSameDay(e.date, normalizedDate));
+                          } catch (_) {
+                            return null;
+                          }
+                        },
+                      )),
+            );
+          },
+          label: Text(localizations.viewMyDiary),
+          icon: const Icon(Icons.calendar_month_outlined),
+        ),
+        orElse: () => null,
       ),
     );
   }

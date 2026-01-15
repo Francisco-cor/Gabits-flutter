@@ -1,7 +1,6 @@
 // lib/screens/home_screen.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -18,8 +17,8 @@ import 'package:gabits/generated/l10n/app_localizations.dart';
 import 'package:gabits/models/habit_model.dart';
 import 'package:gabits/models/note_model.dart';
 import 'package:gabits/models/diary_entry_model.dart';
-import 'package:gabits/services/database_service.dart';
 import 'package:gabits/providers/habits_provider.dart';
+import 'package:gabits/providers/diary_provider.dart';
 import 'package:isar_community/isar.dart';
 
 class MyHomePage extends ConsumerStatefulWidget {
@@ -31,7 +30,6 @@ class MyHomePage extends ConsumerStatefulWidget {
 
 class _MyHomePageState extends ConsumerState<MyHomePage>
     with TickerProviderStateMixin {
-  List<DiaryEntry> _allDiaryEntries = [];
   Timer? _updateTimer;
   String _currentDate = '';
 
@@ -48,21 +46,11 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _loadInitialDiaryEntries();
     _updateTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         _updateCurrentDate();
       }
     });
-  }
-
-  Future<void> _loadInitialDiaryEntries() async {
-    final entriesFromDb = await isar.diaryEntrys.where().findAll();
-    if (mounted) {
-      setState(() {
-        _allDiaryEntries = entriesFromDb;
-      });
-    }
   }
 
   @override
@@ -152,24 +140,17 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
     }
   }
 
-  Future<void> _addOrUpdateDiaryEntry(DiaryEntry entry) async {
-    await isar.writeTxn(() async {
-      await isar.diaryEntrys.put(entry);
-    });
-    await _loadInitialDiaryEntries();
-  }
-
-  DiaryEntry? _getDiaryEntryForDate(DateTime date) {
+  DiaryEntry? _getDiaryEntryForDate(DateTime date, List<DiaryEntry> entries) {
     final normalizedDate = DiaryEntry.normalizeDate(date);
     try {
-      return _allDiaryEntries
-          .firstWhere((e) => isSameDay(e.date, normalizedDate));
+      return entries.firstWhere((e) => isSameDay(e.date, normalizedDate));
     } catch (e) {
       return null;
     }
   }
 
-  void _showFabMenu(BuildContext context, AppLocalizations localizations) {
+  void _showFabMenu(BuildContext context, AppLocalizations localizations,
+      List<DiaryEntry> diaryEntries) {
     _fabIconAnimationController.forward();
     _fabMenuOverlayEntry = OverlayEntry(
       builder: (overlayContext) {
@@ -186,7 +167,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
               showWhenUnlinked: false,
               offset: const Offset(-230 + 40, -176),
               child: _buildFabMenuContent(
-                  context, localizations, Theme.of(context)),
+                  context, localizations, Theme.of(context), diaryEntries),
             ),
           ],
         );
@@ -205,8 +186,11 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
     }
   }
 
-  Widget _buildFabMenuContent(BuildContext buildContextForNavigation,
-      AppLocalizations localizations, ThemeData theme) {
+  Widget _buildFabMenuContent(
+      BuildContext buildContextForNavigation,
+      AppLocalizations localizations,
+      ThemeData theme,
+      List<DiaryEntry> diaryEntries) {
     final menuOptions = [
       {
         'icon': Icons.edit_calendar_outlined,
@@ -214,20 +198,13 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
         'action': () {
           _closeFabMenu();
           final today = DiaryEntry.normalizeDate(DateTime.now());
-          final entryForToday = _getDiaryEntryForDate(today);
-          Navigator.of(buildContextForNavigation)
-              .push(MaterialPageRoute(
+          final entryForToday = _getDiaryEntryForDate(today, diaryEntries);
+          Navigator.of(buildContextForNavigation).push(MaterialPageRoute(
             builder: (context) => DiaryScreen(
               currentDate: today,
               initialEntry: entryForToday,
-              onSave: _addOrUpdateDiaryEntry,
-              allDiaryEntries: _allDiaryEntries,
-              getDiaryEntryForDate: _getDiaryEntryForDate,
             ),
-          ))
-              .then((_) {
-            if (mounted) _loadInitialDiaryEntries();
-          });
+          ));
         }
       },
       {
@@ -321,6 +298,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final habitsAsync = ref.watch(habitsNotifierProvider);
+    final diaryAsync = ref.watch(diaryNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -338,13 +316,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
             icon: const Icon(Icons.calendar_month_outlined),
             tooltip: localizations.calendarTitle,
             onPressed: () {
-              habitsAsync.whenData((allHabits) {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            CalendarScreen(allHabits: allHabits)));
-              });
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const CalendarScreen()));
             },
           )
               .animate()
@@ -380,7 +355,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                           builder: (context) => const HabitsScreen())),
                   splashColor: theme.colorScheme.secondary.withOpacity(0.1),
                   highlightColor: theme.colorScheme.primary.withOpacity(0.05),
-                  textColor: theme.colorScheme.onBackground.withOpacity(0.9),
+                  textColor: theme.colorScheme.onSurface.withOpacity(0.9),
                 )
                     .animate()
                     .fadeIn(delay: 400.ms, duration: 500.ms)
@@ -395,7 +370,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                           builder: (context) => const NotesScreen())),
                   splashColor: theme.colorScheme.secondary.withOpacity(0.1),
                   highlightColor: theme.colorScheme.primary.withOpacity(0.05),
-                  textColor: theme.colorScheme.onBackground.withOpacity(0.9),
+                  textColor: theme.colorScheme.onSurface.withOpacity(0.9),
                 )
                     .animate()
                     .fadeIn(delay: 500.ms, duration: 500.ms)
@@ -406,22 +381,21 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                   label: localizations.diary,
                   onTap: () {
                     final today = DiaryEntry.normalizeDate(DateTime.now());
-                    final entryForToday = _getDiaryEntryForDate(today);
+                    final entries = diaryAsync.maybeWhen(
+                        data: (e) => e, orElse: () => <DiaryEntry>[]);
+                    final entryForToday = _getDiaryEntryForDate(today, entries);
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => DiaryScreen(
                             currentDate: today,
                             initialEntry: entryForToday,
-                            onSave: _addOrUpdateDiaryEntry,
-                            allDiaryEntries: _allDiaryEntries,
-                            getDiaryEntryForDate: _getDiaryEntryForDate,
                           ),
                         ));
                   },
                   splashColor: theme.colorScheme.secondary.withOpacity(0.1),
                   highlightColor: theme.colorScheme.primary.withOpacity(0.05),
-                  textColor: theme.colorScheme.onBackground.withOpacity(0.9),
+                  textColor: theme.colorScheme.onSurface.withOpacity(0.9),
                 )
                     .animate()
                     .fadeIn(delay: 600.ms, duration: 500.ms)
@@ -437,7 +411,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onBackground.withOpacity(0.9),
+                color: theme.colorScheme.onSurface.withOpacity(0.9),
               ),
             ).animate().fadeIn(delay: 700.ms, duration: 400.ms),
           ),
@@ -445,7 +419,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
             child: habitsAsync.when(
               data: (allHabits) {
                 final now = DateTime.now();
-                final int dayIndexForSchedule = now.weekday - 1;
+                final int dayIndexForSchedule =
+                    now.weekday == 7 ? 0 : now.weekday;
 
                 final dailyRoutineHabits = allHabits.where((h) {
                   return h.scheduleDays.contains(dayIndexForSchedule);
@@ -487,7 +462,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
           onPressed: () {
             if (_fabMenuOverlayEntry == null) {
               final loc = AppLocalizations.of(context)!;
-              _showFabMenu(context, loc);
+              final entries = diaryAsync.maybeWhen(
+                  data: (e) => e, orElse: () => <DiaryEntry>[]);
+              _showFabMenu(context, loc, entries);
             } else {
               _closeFabMenu();
             }
@@ -526,7 +503,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
               style: TextStyle(
                   fontSize: 19,
                   fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onBackground.withOpacity(0.7)),
+                  color: theme.colorScheme.onSurface.withOpacity(0.7)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),

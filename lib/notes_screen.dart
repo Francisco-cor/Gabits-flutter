@@ -1,6 +1,7 @@
 // lib/notes_screen.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:gabits/utils/quill_utils.dart';
 import 'package:gabits/generated/l10n/app_localizations.dart';
@@ -9,49 +10,31 @@ import 'package:gabits/models/note_model.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:isar_community/isar.dart';
-import 'package:gabits/services/database_service.dart' show isar;
+import 'package:gabits/providers/notes_provider.dart';
 
-class NotesScreen extends StatefulWidget {
+class NotesScreen extends ConsumerStatefulWidget {
   final Note? newlyAddedNote;
 
   const NotesScreen({super.key, this.newlyAddedNote});
 
   @override
-  State<NotesScreen> createState() => _NotesScreenState();
+  ConsumerState<NotesScreen> createState() => _NotesScreenState();
 }
 
-class _NotesScreenState extends State<NotesScreen> {
-  final List<Note> _notes = [];
+class _NotesScreenState extends ConsumerState<NotesScreen> {
   Id? _noteIdWithOptionsOpen;
 
   @override
   void initState() {
     super.initState();
-    _loadNotesThenHandleNew();
-  }
-
-  Future<void> _loadNotesThenHandleNew() async {
-    await _loadNotesFromIsar();
-    if (widget.newlyAddedNote != null && mounted) {
-      await _addOrUpdateNote(widget.newlyAddedNote!);
-    }
-  }
-
-  Future<void> _loadNotesFromIsar() async {
-    final notesFromDb =
-        await isar.notes.where().sortByUpdatedAtDesc().findAll();
-    if (mounted) {
-      setState(() {
-        _notes.clear();
-        _notes.addAll(notesFromDb);
+    if (widget.newlyAddedNote != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(notesNotifierProvider.notifier)
+            .addNote(widget.newlyAddedNote!);
       });
     }
   }
-
-  // _sortNotes() ya no sería necesario si la consulta de Isar ordena como quieres.
-  // void _sortNotes() {
-  //   _notes.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-  // }
 
   String _getPlainTextFromDelta(String deltaJson, {int maxLength = 80}) {
     if (deltaJson.isEmpty) return '';
@@ -70,37 +53,29 @@ class _NotesScreenState extends State<NotesScreen> {
     }
   }
 
-  Future<void> _addOrUpdateNote(Note note) async {
-    await isar.writeTxn(() async {
-      await isar.notes.put(note);
-    });
-    if (mounted) {
-      await _loadNotesFromIsar();
-    }
-  }
-
   void _navigateToNewNoteScreen({Note? noteToEdit}) async {
-    final currentContext = context; // Capturar antes de await
-
     final Note? resultNote = await Navigator.push<Note>(
-      currentContext,
+      context,
       MaterialPageRoute(
         builder: (context) => NewNoteScreen(noteToEdit: noteToEdit),
       ),
     );
 
     if (resultNote != null && mounted) {
-      await _addOrUpdateNote(resultNote);
+      if (noteToEdit != null) {
+        await ref.read(notesNotifierProvider.notifier).updateNote(resultNote);
+      } else {
+        await ref.read(notesNotifierProvider.notifier).addNote(resultNote);
+      }
+
       if (noteToEdit != null && _noteIdWithOptionsOpen == noteToEdit.id) {
-        if (mounted) {
-          setState(() => _noteIdWithOptionsOpen = null);
-        }
+        setState(() => _noteIdWithOptionsOpen = null);
       }
     }
   }
 
   void _confirmDeleteNote(Note noteToDelete, AppLocalizations localizations) {
-    final theme = Theme.of(context); // Capturar antes de await
+    final theme = Theme.of(context);
 
     showDialog(
       context: context,
@@ -125,14 +100,11 @@ class _NotesScreenState extends State<NotesScreen> {
             child: Text(localizations.deleteButtonLabel),
             onPressed: () async {
               Navigator.of(ctx).pop();
-              await isar.writeTxn(() async {
-                await isar.notes.delete(noteToDelete.id);
-              });
-              if (mounted) {
-                if (_noteIdWithOptionsOpen == noteToDelete.id) {
-                  _noteIdWithOptionsOpen = null;
-                }
-                await _loadNotesFromIsar();
+              await ref
+                  .read(notesNotifierProvider.notifier)
+                  .deleteNote(noteToDelete.id);
+              if (mounted && _noteIdWithOptionsOpen == noteToDelete.id) {
+                setState(() => _noteIdWithOptionsOpen = null);
               }
             },
           ),
@@ -205,7 +177,7 @@ class _NotesScreenState extends State<NotesScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  "${localizations.created}: $formattedCreationDate", // Usar clave de localización
+                  "${localizations.created}: $formattedCreationDate",
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),
@@ -214,7 +186,7 @@ class _NotesScreenState extends State<NotesScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
-                      "${localizations.updated}: $formattedUpdateDate", // Usar clave de localización
+                      "${localizations.updated}: $formattedUpdateDate",
                       style: theme.textTheme.bodySmall
                           ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     ),
@@ -248,14 +220,22 @@ class _NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final notesAsync = ref.watch(notesNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(localizations.myNotes),
       ),
-      body: _notes.isEmpty
-          ? _buildEmptyState(localizations, theme)
-          : _buildNotesList(_notes, localizations, theme),
+      body: notesAsync.when(
+        data: (notes) {
+          if (notes.isEmpty) {
+            return _buildEmptyState(localizations, theme);
+          }
+          return _buildNotesList(notes, localizations, theme);
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text("Error: $error")),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _navigateToNewNoteScreen(),
         label: Text(localizations.newNoteOption),
@@ -299,8 +279,8 @@ class _NotesScreenState extends State<NotesScreen> {
       )
           .animate()
           .fadeIn(duration: 400.ms)
-          .scaleXY(begin: 0.95, curve: Curves.easeOutCubic), // DESCOMENTADO
-    ); // DESCOMENTADO
+          .scaleXY(begin: 0.95, curve: Curves.easeOutCubic),
+    );
   }
 
   Widget _buildNotesList(
@@ -341,22 +321,16 @@ class _NotesScreenState extends State<NotesScreen> {
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: () {
-              final currentLocalizations = AppLocalizations.of(context)!;
-              final currentTheme = Theme.of(context);
               if (showInlineOptions) {
-                if (mounted) {
-                  setState(() => _noteIdWithOptionsOpen = null);
-                }
+                setState(() => _noteIdWithOptionsOpen = null);
               } else {
-                _showNoteDetailsPopup(note, currentLocalizations, currentTheme);
+                _showNoteDetailsPopup(note, localizations, theme);
               }
             },
             onLongPress: () {
-              if (mounted) {
-                setState(() {
-                  _noteIdWithOptionsOpen = showInlineOptions ? null : note.id;
-                });
-              }
+              setState(() {
+                _noteIdWithOptionsOpen = showInlineOptions ? null : note.id;
+              });
             },
             borderRadius: cardBaseBorderRadius,
             child: Column(
@@ -439,12 +413,8 @@ class _NotesScreenState extends State<NotesScreen> {
                                 icon: Icons.delete_outline_rounded,
                                 label: localizations.deleteButtonLabel,
                                 color: theme.colorScheme.error,
-                                onTap: () {
-                                  final currentLocalizations =
-                                      AppLocalizations.of(context)!;
-                                  _confirmDeleteNote(
-                                      note, currentLocalizations);
-                                },
+                                onTap: () =>
+                                    _confirmDeleteNote(note, localizations),
                               ),
                             ],
                           ),

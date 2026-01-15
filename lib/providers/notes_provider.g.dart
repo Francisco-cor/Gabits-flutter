@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'habits_provider.dart';
+part of 'notes_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$habitsNotifierHash() => r'2ce2a3dcdb644d3953093e519a3c4e21bdad0ac1';
+String _$notesNotifierHash() => r'b54d4c37034139cd55104859fe5c534bc3ca061f';
 
-/// See also [HabitsNotifier].
-@ProviderFor(HabitsNotifier)
-final habitsNotifierProvider =
-    AutoDisposeAsyncNotifierProvider<HabitsNotifier, List<Habit>>.internal(
-  HabitsNotifier.new,
-  name: r'habitsNotifierProvider',
+/// See also [NotesNotifier].
+@ProviderFor(NotesNotifier)
+final notesNotifierProvider =
+    AutoDisposeAsyncNotifierProvider<NotesNotifier, List<Note>>.internal(
+  NotesNotifier.new,
+  name: r'notesNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$habitsNotifierHash,
+      : _$notesNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$HabitsNotifier = AutoDisposeAsyncNotifier<List<Habit>>;
+typedef _$NotesNotifier = AutoDisposeAsyncNotifier<List<Note>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

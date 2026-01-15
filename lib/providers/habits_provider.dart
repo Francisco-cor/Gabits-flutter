@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:gabits/models/habit_model.dart';
-import 'package:gabits/services/database_service.dart';
+import 'package:gabits/repositories/habit_repository.dart';
 import 'package:isar_community/isar.dart';
 
 part 'habits_provider.g.dart';
@@ -13,25 +13,24 @@ class HabitsNotifier extends _$HabitsNotifier {
   }
 
   Future<List<Habit>> _fetchHabits() async {
-    return await isar.habits.where().findAll();
+    final repository = ref.read(habitRepositoryProvider);
+    return await repository.getAllHabits();
   }
 
   Future<void> addHabit(Habit habit) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await isar.writeTxn(() async {
-        await isar.habits.put(habit);
-      });
+      final repository = ref.read(habitRepositoryProvider);
+      await repository.putHabit(habit);
       return _fetchHabits();
     });
   }
 
-  Future<void> updateHabit(Habit updatedHabit) async {
+  Future<void> updateHabit(Habit habit) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await isar.writeTxn(() async {
-        await isar.habits.put(updatedHabit);
-      });
+      final repository = ref.read(habitRepositoryProvider);
+      await repository.putHabit(habit);
       return _fetchHabits();
     });
   }
@@ -39,9 +38,8 @@ class HabitsNotifier extends _$HabitsNotifier {
   Future<void> deleteHabit(Id id) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await isar.writeTxn(() async {
-        await isar.habits.delete(id);
-      });
+      final repository = ref.read(habitRepositoryProvider);
+      await repository.deleteHabit(id);
       return _fetchHabits();
     });
   }

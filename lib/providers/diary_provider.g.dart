@@ -1,26 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'habits_provider.dart';
+part of 'diary_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$habitsNotifierHash() => r'2ce2a3dcdb644d3953093e519a3c4e21bdad0ac1';
+String _$diaryNotifierHash() => r'a0a401889bee76714de63655e45a1ed302e7e6b9';
 
-/// See also [HabitsNotifier].
-@ProviderFor(HabitsNotifier)
-final habitsNotifierProvider =
-    AutoDisposeAsyncNotifierProvider<HabitsNotifier, List<Habit>>.internal(
-  HabitsNotifier.new,
-  name: r'habitsNotifierProvider',
+/// See also [DiaryNotifier].
+@ProviderFor(DiaryNotifier)
+final diaryNotifierProvider =
+    AutoDisposeAsyncNotifierProvider<DiaryNotifier, List<DiaryEntry>>.internal(
+  DiaryNotifier.new,
+  name: r'diaryNotifierProvider',
   debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
       ? null
-      : _$habitsNotifierHash,
+      : _$diaryNotifierHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
-typedef _$HabitsNotifier = AutoDisposeAsyncNotifier<List<Habit>>;
+typedef _$DiaryNotifier = AutoDisposeAsyncNotifier<List<DiaryEntry>>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
