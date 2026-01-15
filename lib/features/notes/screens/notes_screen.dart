@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:gabits/utils/quill_utils.dart';
 import 'package:gabits/generated/l10n/app_localizations.dart';
-import 'package:gabits/new_note_screen.dart';
+import 'package:gabits/features/notes/screens/new_note_screen.dart';
 import 'package:gabits/models/note_model.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';

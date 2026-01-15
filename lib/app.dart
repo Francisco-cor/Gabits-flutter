@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:gabits/generated/l10n/app_localizations.dart';
-import 'package:gabits/screens/home_screen.dart';
+import 'package:gabits/features/home/screens/home_screen.dart';
 import 'package:gabits/theme/app_theme.dart';
 
 class MyApp extends StatelessWidget {

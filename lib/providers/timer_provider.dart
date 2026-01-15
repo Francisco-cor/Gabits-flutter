@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:gabits/timer_screen.dart';
+import 'package:gabits/features/timer/screens/timer_screen.dart';
 
 part 'timer_provider.g.dart';
 
