@@ -9,8 +9,7 @@ import 'package:gabits/models/note_model.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:isar_community/isar.dart';
-import 'package:gabits/main.dart'
-    show isar; // <-- IMPORTA TU INSTANCIA GLOBAL DE ISAR
+import 'package:gabits/services/database_service.dart' show isar;
 
 class NotesScreen extends StatefulWidget {
   final Note? newlyAddedNote;

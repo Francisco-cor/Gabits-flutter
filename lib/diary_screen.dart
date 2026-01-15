@@ -172,6 +172,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                         showLink: true,
                         showClearFormat: true,
                         showHeaderStyle: true,
+                        multiRowsDisplay: false,
                       ),
                     ),
                     const Divider(height: 1, thickness: 0.5),
