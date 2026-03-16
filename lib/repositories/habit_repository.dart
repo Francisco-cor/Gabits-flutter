@@ -1,6 +1,6 @@
 import 'package:isar_community/isar.dart';
 import 'package:gabits/models/habit_model.dart';
-import 'package:gabits/services/database_service.dart';
+import 'package:gabits/providers/isar_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'habit_repository.g.dart';
@@ -18,25 +18,37 @@ class IsarHabitRepository implements HabitRepository {
 
   @override
   Future<List<Habit>> getAllHabits() async {
-    return await _isar.habits.where().findAll();
+    try {
+      return await _isar.habits.where().findAll();
+    } catch (e) {
+      throw Exception('Failed to load habits: $e');
+    }
   }
 
   @override
   Future<void> putHabit(Habit habit) async {
-    await _isar.writeTxn(() async {
-      await _isar.habits.put(habit);
-    });
+    try {
+      await _isar.writeTxn(() async {
+        await _isar.habits.put(habit);
+      });
+    } catch (e) {
+      throw Exception('Failed to save habit: $e');
+    }
   }
 
   @override
   Future<void> deleteHabit(Id id) async {
-    await _isar.writeTxn(() async {
-      await _isar.habits.delete(id);
-    });
+    try {
+      await _isar.writeTxn(() async {
+        await _isar.habits.delete(id);
+      });
+    } catch (e) {
+      throw Exception('Failed to delete habit: $e');
+    }
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 HabitRepository habitRepository(HabitRepositoryRef ref) {
-  return IsarHabitRepository(isar);
+  return IsarHabitRepository(ref.watch(isarInstanceProvider));
 }

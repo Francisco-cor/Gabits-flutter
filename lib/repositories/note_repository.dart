@@ -1,6 +1,6 @@
 import 'package:isar_community/isar.dart';
 import 'package:gabits/models/note_model.dart';
-import 'package:gabits/services/database_service.dart';
+import 'package:gabits/providers/isar_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'note_repository.g.dart';
@@ -18,25 +18,37 @@ class IsarNoteRepository implements NoteRepository {
 
   @override
   Future<List<Note>> getAllNotes() async {
-    return await _isar.notes.where().sortByCreatedAtDesc().findAll();
+    try {
+      return await _isar.notes.where().sortByCreatedAtDesc().findAll();
+    } catch (e) {
+      throw Exception('Failed to load notes: $e');
+    }
   }
 
   @override
   Future<void> putNote(Note note) async {
-    await _isar.writeTxn(() async {
-      await _isar.notes.put(note);
-    });
+    try {
+      await _isar.writeTxn(() async {
+        await _isar.notes.put(note);
+      });
+    } catch (e) {
+      throw Exception('Failed to save note: $e');
+    }
   }
 
   @override
   Future<void> deleteNote(Id id) async {
-    await _isar.writeTxn(() async {
-      await _isar.notes.delete(id);
-    });
+    try {
+      await _isar.writeTxn(() async {
+        await _isar.notes.delete(id);
+      });
+    } catch (e) {
+      throw Exception('Failed to delete note: $e');
+    }
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 NoteRepository noteRepository(NoteRepositoryRef ref) {
-  return IsarNoteRepository(isar);
+  return IsarNoteRepository(ref.watch(isarInstanceProvider));
 }

@@ -127,7 +127,7 @@ class TimerNotifier extends _$TimerNotifier {
     } else {
       _stopwatch.start();
       _stopwatchTimer =
-          Timer.periodic(const Duration(milliseconds: 33), (timer) {
+          Timer.periodic(const Duration(milliseconds: 100), (timer) {
         _updateStopwatchDisplay();
       });
     }

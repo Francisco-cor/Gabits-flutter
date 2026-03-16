@@ -122,6 +122,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
     final updatedHabit = t.copyWith(isCompleted: !t.isCompleted);
     await ref.read(habitsNotifierProvider.notifier).updateHabit(updatedHabit);
 
+    if (!mounted) return;
+
     if (updatedHabit.isCompleted) {
       HapticFeedback.mediumImpact();
       _rewardTimer?.cancel();
@@ -216,6 +218,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
               await Navigator.of(buildContextForNavigation).push(
             MaterialPageRoute(builder: (innerContext) => const NewNoteScreen()),
           );
+          if (!buildContextForNavigation.mounted) return;
           if (returnedValue is Note) {
             final Note newNote = returnedValue;
             Navigator.of(buildContextForNavigation).push(
@@ -234,6 +237,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
           final Habit? nH = await Navigator.of(buildContextForNavigation)
               .push<Habit>(
                   MaterialPageRoute(builder: (c) => const NewHabitScreen()));
+          if (!buildContextForNavigation.mounted) return;
           if (nH != null) {
             await ref.read(habitsNotifierProvider.notifier).addHabit(nH);
           }

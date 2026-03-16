@@ -47,8 +47,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           ? '${plainText.substring(0, maxLength - 3)}...'
           : plainText;
     } catch (e) {
-      // ignore: avoid_print
-      print('Error al obtener plain text de Delta: $e');
+      debugPrint('Error al obtener plain text de Delta: $e');
       return '';
     }
   }
@@ -127,8 +126,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
         readOnly: true,
       );
     } catch (e) {
-      // ignore: avoid_print
-      print("Error creando QuillController para vista previa: $e");
+      debugPrint('Error creando QuillController para vista previa: $e');
       controller = quill.QuillController.basic();
     }
 
@@ -288,7 +286,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     final cardBaseBorderRadius =
         (theme.cardTheme.shape as RoundedRectangleBorder?)
                 ?.borderRadius
-                ?.resolve(Directionality.of(context)) ??
+                .resolve(Directionality.of(context)) ??
             BorderRadius.circular(16.0);
 
     return ListView.builder(

@@ -4,12 +4,22 @@ import 'package:gabits/models/habit_model.dart';
 import 'package:gabits/models/note_model.dart';
 import 'package:gabits/models/diary_entry_model.dart';
 
-late Isar isar;
-
 class DatabaseService {
+  static Isar? _isar;
+
+  static Isar get instance {
+    final db = _isar;
+    if (db == null) {
+      throw StateError(
+        'DatabaseService has not been initialized. Call DatabaseService.init() first.',
+      );
+    }
+    return db;
+  }
+
   static Future<void> init() async {
     final dir = await getApplicationDocumentsDirectory();
-    isar = await Isar.open(
+    _isar = await Isar.open(
       [HabitSchema, NoteSchema, DiaryEntrySchema],
       directory: dir.path,
     );

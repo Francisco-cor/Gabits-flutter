@@ -94,7 +94,7 @@ class _NewHabitScreenState extends State<NewHabitScreen> with SingleTickerProvid
       form.save(); // Esto es opcional si no usas onSaved en los TextFormField
       return true;
     }
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Please fill all required fields."), backgroundColor: Theme.of(context).colorScheme.error, behavior: SnackBarBehavior.floating));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(localizations.fillRequiredFields), backgroundColor: Theme.of(context).colorScheme.error, behavior: SnackBarBehavior.floating));
     return false;
   }
 

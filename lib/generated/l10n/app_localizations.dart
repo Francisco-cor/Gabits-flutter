@@ -344,6 +344,12 @@ abstract class AppLocalizations {
   /// **'OK'**
   String get ok;
 
+  /// No description provided for @fillRequiredFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all required fields.'**
+  String get fillRequiredFields;
+
   /// No description provided for @habitNameRequired.
   ///
   /// In en, this message translates to:

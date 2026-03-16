@@ -41,6 +41,7 @@
     "selectTime": "Seleccionar Hora",
     "cancel": "Cancelar",
     "ok": "Aceptar",
+    "fillRequiredFields": "Por favor, rellena todos los campos obligatorios.",
     "habitNameRequired": "El nombre del hábito es obligatorio.",
     "habitGoalValueRequired": "El valor de la meta es obligatorio para metas de Tiempo/Cantidad.",
     "habitGoalValueInvalid": "El valor de la meta debe ser un número válido.",

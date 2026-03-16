@@ -1,27 +1,26 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'note_repository.dart';
+part of 'isar_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
 // **************************************************************************
 
-String _$noteRepositoryHash() => r'4b8963db51683843901b076c38ffa7d9845b7986';
+String _$isarInstanceHash() => r'3cd97976fddddd61c3e06d83205b0db4035324ae';
 
-/// See also [noteRepository].
-@ProviderFor(noteRepository)
-final noteRepositoryProvider = Provider<NoteRepository>.internal(
-  noteRepository,
-  name: r'noteRepositoryProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$noteRepositoryHash,
+/// See also [isarInstance].
+@ProviderFor(isarInstance)
+final isarInstanceProvider = Provider<Isar>.internal(
+  isarInstance,
+  name: r'isarInstanceProvider',
+  debugGetCreateSourceHash:
+      const bool.fromEnvironment('dart.vm.product') ? null : _$isarInstanceHash,
   dependencies: null,
   allTransitiveDependencies: null,
 );
 
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
-typedef NoteRepositoryRef = ProviderRef<NoteRepository>;
+typedef IsarInstanceRef = ProviderRef<Isar>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

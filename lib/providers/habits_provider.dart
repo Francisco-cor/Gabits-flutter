@@ -9,38 +9,31 @@ part 'habits_provider.g.dart';
 class HabitsNotifier extends _$HabitsNotifier {
   @override
   FutureOr<List<Habit>> build() async {
-    return _fetchHabits();
-  }
-
-  Future<List<Habit>> _fetchHabits() async {
     final repository = ref.read(habitRepositoryProvider);
-    return await repository.getAllHabits();
+    return repository.getAllHabits();
   }
 
   Future<void> addHabit(Habit habit) async {
-    state = const AsyncValue.loading();
+    final current = state.valueOrNull ?? [];
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(habitRepositoryProvider);
-      await repository.putHabit(habit);
-      return _fetchHabits();
+      await ref.read(habitRepositoryProvider).putHabit(habit);
+      return [...current, habit];
     });
   }
 
   Future<void> updateHabit(Habit habit) async {
-    state = const AsyncValue.loading();
+    final current = state.valueOrNull ?? [];
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(habitRepositoryProvider);
-      await repository.putHabit(habit);
-      return _fetchHabits();
+      await ref.read(habitRepositoryProvider).putHabit(habit);
+      return current.map((h) => h.id == habit.id ? habit : h).toList();
     });
   }
 
   Future<void> deleteHabit(Id id) async {
-    state = const AsyncValue.loading();
+    final current = state.valueOrNull ?? [];
     state = await AsyncValue.guard(() async {
-      final repository = ref.read(habitRepositoryProvider);
-      await repository.deleteHabit(id);
-      return _fetchHabits();
+      await ref.read(habitRepositoryProvider).deleteHabit(id);
+      return current.where((h) => h.id != id).toList();
     });
   }
 }

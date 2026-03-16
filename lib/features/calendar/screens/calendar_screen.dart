@@ -26,46 +26,30 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     _selectedDay = _focusedDay;
   }
 
-  Map<DateTime, List<Habit>> _groupHabitsByDay(List<Habit> habits) {
-    Map<DateTime, List<Habit>> data = {};
-    DateTime rangeStart = DateTime.now().subtract(const Duration(days: 365));
-    DateTime rangeEnd = DateTime.now().add(const Duration(days: 365));
-
-    for (var habit in habits) {
-      for (DateTime date =
-              DateTime(rangeStart.year, rangeStart.month, rangeStart.day);
-          date.isBefore(rangeEnd);
-          date = date.add(const Duration(days: 1))) {
-        final dayOnly = DateTime(date.year, date.month, date.day);
-        final int currentWeekday = dayOnly.weekday == 7 ? 0 : dayOnly.weekday;
-
-        if (habit.scheduleDays.contains(currentWeekday)) {
-          if (data[dayOnly] == null) {
-            data[dayOnly] = [];
-          }
-          if (!data[dayOnly]!.any((h) => h.id == habit.id)) {
-            data[dayOnly]!.add(habit);
-          }
-        }
+  // Builds a weekday index (0=Sun, 1=Mon, …, 6=Sat) → sorted habit list.
+  // O(n) instead of the previous O(730 × n) full-range loop.
+  Map<int, List<Habit>> _buildHabitsByWeekday(List<Habit> habits) {
+    final Map<int, List<Habit>> byWeekday = {};
+    for (final habit in habits) {
+      for (final day in habit.scheduleDays) {
+        byWeekday.putIfAbsent(day, () => []).add(habit);
       }
     }
-
-    data.forEach((date, habitList) {
-      habitList.sort((a, b) {
-        final aDateTime =
-            DateTime(0, 0, 0, a.startTime.hour, a.startTime.minute);
-        final bDateTime =
-            DateTime(0, 0, 0, b.startTime.hour, b.startTime.minute);
-        return aDateTime.compareTo(bDateTime);
+    for (final list in byWeekday.values) {
+      list.sort((a, b) {
+        final aMinutes = a.startTime.hour * 60 + a.startTime.minute;
+        final bMinutes = b.startTime.hour * 60 + b.startTime.minute;
+        return aMinutes.compareTo(bMinutes);
       });
-    });
-    return data;
+    }
+    return byWeekday;
   }
 
   List<Habit> _getHabitsForDay(
-      DateTime day, Map<DateTime, List<Habit>> events) {
-    final dayOnly = DateTime(day.year, day.month, day.day);
-    return events[dayOnly] ?? [];
+      DateTime day, Map<int, List<Habit>> byWeekday) {
+    // Dart weekday: 1=Mon … 6=Sat, 7=Sun → map to 0=Sun, 1=Mon … 6=Sat
+    final int weekday = day.weekday == 7 ? 0 : day.weekday;
+    return byWeekday[weekday] ?? [];
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
@@ -225,9 +209,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       ),
       body: habitsAsync.when(
         data: (habits) {
-          final events = _groupHabitsByDay(habits);
+          final byWeekday = _buildHabitsByWeekday(habits);
           final selectedHabits =
-              _getHabitsForDay(_selectedDay ?? _focusedDay, events);
+              _getHabitsForDay(_selectedDay ?? _focusedDay, byWeekday);
 
           return Column(
             children: [
@@ -245,7 +229,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   selectedDayPredicate: (day) => isSameDay(
                       _selectedDay, DateTime(day.year, day.month, day.day)),
                   calendarFormat: _calendarFormat,
-                  eventLoader: (day) => _getHabitsForDay(day, events),
+                  eventLoader: (day) => _getHabitsForDay(day, byWeekday),
                   startingDayOfWeek: StartingDayOfWeek.monday,
                   calendarStyle: CalendarStyle(
                     outsideDaysVisible: false,

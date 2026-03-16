@@ -41,6 +41,7 @@
     "selectTime": "Select Time",
     "cancel": "Cancel",
     "ok": "OK",
+    "fillRequiredFields": "Please fill all required fields.",
     "habitNameRequired": "Habit name is required.",
     "habitGoalValueRequired": "Goal value is required for Time/Quantity goals.",
     "habitGoalValueInvalid": "Goal value must be a valid number.",

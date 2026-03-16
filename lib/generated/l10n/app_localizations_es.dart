@@ -132,6 +132,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get ok => 'Aceptar';
 
   @override
+  String get fillRequiredFields =>
+      'Por favor, rellena todos los campos obligatorios.';
+
+  @override
   String get habitNameRequired => 'El nombre del hábito es obligatorio.';
 
   @override
