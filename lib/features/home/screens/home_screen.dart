@@ -12,6 +12,7 @@ import 'package:gabits/features/diary/screens/diary_screen.dart';
 import 'package:gabits/features/habits/screens/new_habit_screen.dart';
 import 'package:gabits/features/notes/screens/new_note_screen.dart';
 import 'package:gabits/features/calendar/screens/calendar_screen.dart';
+import 'package:gabits/features/settings/screens/settings_screen.dart';
 import 'package:gabits/features/timer/screens/timer_screen.dart';
 import 'package:gabits/generated/l10n/app_localizations.dart';
 import 'package:gabits/models/habit_model.dart';
@@ -337,6 +338,17 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
           )
               .animate()
               .fadeIn(delay: 300.ms, duration: 400.ms)
+              .slideX(begin: 0.2),
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: localizations.settingsScreenTitle,
+            onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const SettingsScreen())),
+          )
+              .animate()
+              .fadeIn(delay: 400.ms, duration: 400.ms)
               .slideX(begin: 0.2),
           const SizedBox(width: 8),
         ],

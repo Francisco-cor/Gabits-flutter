@@ -480,4 +480,37 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get emptyDiaryEntryPlaceholder =>
       'Start writing your diary for today...';
+
+  @override
+  String get settingsScreenTitle => 'Settings';
+
+  @override
+  String get settingsAppearanceSection => 'Appearance';
+
+  @override
+  String get settingsThemeMode => 'Theme';
+
+  @override
+  String get settingsThemeLight => 'Light';
+
+  @override
+  String get settingsThemeDark => 'Dark';
+
+  @override
+  String get settingsThemeSystem => 'System';
+
+  @override
+  String get settingsLanguageSection => 'Language';
+
+  @override
+  String get settingsLanguageLabel => 'Language';
+
+  @override
+  String get settingsAboutSection => 'About';
+
+  @override
+  String get settingsAppName => 'Gabits';
+
+  @override
+  String get settingsAppDescription => 'Your routine companion';
 }

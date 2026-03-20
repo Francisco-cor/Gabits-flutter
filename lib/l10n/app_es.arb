@@ -219,5 +219,17 @@
             }
         }
     },
-    "emptyDiaryEntryPlaceholder": "Empieza a escribir tu diario de hoy..."
+    "emptyDiaryEntryPlaceholder": "Empieza a escribir tu diario de hoy...",
+
+    "settingsScreenTitle": "Ajustes",
+    "settingsAppearanceSection": "Apariencia",
+    "settingsThemeMode": "Tema",
+    "settingsThemeLight": "Claro",
+    "settingsThemeDark": "Oscuro",
+    "settingsThemeSystem": "Sistema",
+    "settingsLanguageSection": "Idioma",
+    "settingsLanguageLabel": "Idioma",
+    "settingsAboutSection": "Acerca de",
+    "settingsAppName": "Gabits",
+    "settingsAppDescription": "Tu compañero de rutinas"
 }

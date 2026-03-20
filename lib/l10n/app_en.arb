@@ -219,5 +219,17 @@
             }
         }
     },
-    "emptyDiaryEntryPlaceholder": "Start writing your diary for today..."
+    "emptyDiaryEntryPlaceholder": "Start writing your diary for today...",
+
+    "settingsScreenTitle": "Settings",
+    "settingsAppearanceSection": "Appearance",
+    "settingsThemeMode": "Theme",
+    "settingsThemeLight": "Light",
+    "settingsThemeDark": "Dark",
+    "settingsThemeSystem": "System",
+    "settingsLanguageSection": "Language",
+    "settingsLanguageLabel": "Language",
+    "settingsAboutSection": "About",
+    "settingsAppName": "Gabits",
+    "settingsAppDescription": "Your routine companion"
 }

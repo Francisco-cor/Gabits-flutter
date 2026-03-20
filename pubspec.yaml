@@ -42,6 +42,9 @@ dependencies:
   flutter_riverpod: ^2.6.1
   riverpod_annotation: ^2.3.5
 
+  # Settings persistence
+  shared_preferences: ^2.3.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
