@@ -8,7 +8,6 @@ import 'package:gabits/features/diary/screens/calendar_diary_screen.dart';
 import 'package:gabits/models/diary_entry_model.dart';
 import 'package:gabits/generated/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:gabits/providers/diary_provider.dart';
 
 class DiaryScreen extends ConsumerStatefulWidget {
@@ -208,15 +207,8 @@ class _DiaryScreenState extends ConsumerState<DiaryScreen> {
               MaterialPageRoute(
                   builder: (context) => CalendarDiaryScreen(
                         allDiaryEntries: entries,
-                        getDiaryEntryForDate: (date) {
-                          final normalizedDate = DiaryEntry.normalizeDate(date);
-                          try {
-                            return entries.firstWhere(
-                                (e) => isSameDay(e.date, normalizedDate));
-                          } catch (_) {
-                            return null;
-                          }
-                        },
+                        getDiaryEntryForDate: (date) =>
+                            DiaryEntry.forDate(entries, date),
                       )),
             );
           },

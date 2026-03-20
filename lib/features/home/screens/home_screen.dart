@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter/services.dart';
 import 'package:gabits/features/habits/screens/habits_screen.dart';
 import 'package:gabits/features/notes/screens/notes_screen.dart';
@@ -158,15 +157,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
     }
   }
 
-  DiaryEntry? _getDiaryEntryForDate(DateTime date, List<DiaryEntry> entries) {
-    final normalizedDate = DiaryEntry.normalizeDate(date);
-    try {
-      return entries.firstWhere((e) => isSameDay(e.date, normalizedDate));
-    } catch (e) {
-      return null;
-    }
-  }
-
   void _showFabMenu(BuildContext context, AppLocalizations localizations,
       List<DiaryEntry> diaryEntries) {
     _fabIconAnimationController.forward();
@@ -217,7 +207,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
         'action': () {
           _closeFabMenu();
           final today = DiaryEntry.normalizeDate(DateTime.now());
-          final entryForToday = _getDiaryEntryForDate(today, diaryEntries);
+          final entryForToday = DiaryEntry.forDate(diaryEntries, today);
           Navigator.of(buildContextForNavigation).push(MaterialPageRoute(
             builder: (context) => DiaryScreen(
               currentDate: today,
@@ -419,7 +409,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                     final today = DiaryEntry.normalizeDate(DateTime.now());
                     final entries = diaryAsync.maybeWhen(
                         data: (e) => e, orElse: () => <DiaryEntry>[]);
-                    final entryForToday = _getDiaryEntryForDate(today, entries);
+                    final entryForToday = DiaryEntry.forDate(entries, today);
                     Navigator.push(
                         context,
                         MaterialPageRoute(

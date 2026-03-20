@@ -43,6 +43,17 @@ class DiaryEntry {
     return DateTime(dt.year, dt.month, dt.day);
   }
 
+  /// Returns the entry matching [date] from [entries], or null if not found.
+  /// Both sides are normalized so no time-component comparison is needed.
+  static DiaryEntry? forDate(List<DiaryEntry> entries, DateTime date) {
+    final normalized = normalizeDate(date);
+    try {
+      return entries.firstWhere((e) => e.date == normalized);
+    } catch (_) {
+      return null;
+    }
+  }
+
   DiaryEntry copyWith({
     DateTime? date,
     String? contentJson,
