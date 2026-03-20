@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:gabits/models/habit_model.dart';
 import 'package:gabits/generated/l10n/app_localizations.dart';
 import 'package:gabits/providers/habits_provider.dart';
+import 'package:gabits/utils/schedule_utils.dart';
 
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
@@ -66,20 +67,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   void _showHabitDetailsPopup(
       Habit habit, AppLocalizations localizations, ThemeData theme) {
-    List<String> dayChars = habit.scheduleDays.map((dayIndex) {
-      if (dayIndex == 0) return localizations.sundayShort;
-      if (dayIndex == 1) return localizations.mondayShort;
-      if (dayIndex == 2) return localizations.tuesdayShort;
-      if (dayIndex == 3) return localizations.wednesdayShort;
-      if (dayIndex == 4) return localizations.thursdayShort;
-      if (dayIndex == 5) return localizations.fridayShort;
-      if (dayIndex == 6) return localizations.saturdayShort;
-      return '';
-    }).toList();
-    String scheduleString = dayChars.join(', ');
-    if (habit.scheduleDays.length == 7) {
-      scheduleString = localizations.everyDay;
-    }
+    final String scheduleString =
+        formatScheduleString(habit.scheduleDays, localizations);
 
     showDialog(
       context: context,

@@ -37,6 +37,12 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
   OverlayEntry? _fabMenuOverlayEntry;
   final LayerLink _fabLayerLink = LayerLink();
   late AnimationController _fabIconAnimationController;
+
+  // FAB menu positioning: menu aligns its right edge to the FAB's right edge
+  // and floats above it. Adjust if FAB size or menu content changes.
+  static const double _fabMenuWidth = 230.0;
+  static const double _fabMenuHeight = 176.0;
+  static const double _fabButtonWidth = 40.0;
   Id? _habitIdInRewardState;
   Timer? _rewardTimer;
 
@@ -168,7 +174,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
             CompositedTransformFollower(
               link: _fabLayerLink,
               showWhenUnlinked: false,
-              offset: const Offset(-230 + 40, -176),
+              offset: const Offset(
+                  -_fabMenuWidth + _fabButtonWidth, -_fabMenuHeight),
               child: _buildFabMenuContent(
                   context, localizations, Theme.of(context), diaryEntries),
             ),
@@ -304,6 +311,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
     final theme = Theme.of(context);
     final habitsAsync = ref.watch(habitsNotifierProvider);
     final diaryAsync = ref.watch(diaryNotifierProvider);
+    final cardBorderRadius = (theme.cardTheme.shape as RoundedRectangleBorder?)
+            ?.borderRadius
+            .resolve(Directionality.of(context)) ??
+        BorderRadius.circular(14.0);
 
     return Scaffold(
       appBar: AppBar(
@@ -462,7 +473,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                   itemCount: dailyRoutineHabits.length,
                   itemBuilder: (context, index) {
                     final habit = dailyRoutineHabits[index];
-                    return _buildHabitCard(habit, localizations, theme, index);
+                    return _buildHabitCard(
+                        habit, localizations, theme, index, cardBorderRadius);
                   },
                 );
               },
@@ -540,8 +552,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
     );
   }
 
-  Widget _buildHabitCard(
-      Habit habit, AppLocalizations localizations, ThemeData theme, int index) {
+  Widget _buildHabitCard(Habit habit, AppLocalizations localizations,
+      ThemeData theme, int index, BorderRadius cardBorderRadius) {
     final String formattedTime = habit.startTime.format(context);
     final now = DateTime.now();
     final habitDateTimeToday = DateTime(now.year, now.month, now.day,
@@ -565,13 +577,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
         : (isPassed
             ? theme.colorScheme.onSurface.withOpacity(0.75)
             : theme.colorScheme.onSurfaceVariant);
-
-    BorderRadius cardBorderRadius = BorderRadius.circular(16.0);
-    final cardShape = theme.cardTheme.shape;
-    if (cardShape is RoundedRectangleBorder) {
-      cardBorderRadius =
-          cardShape.borderRadius.resolve(Directionality.of(context));
-    }
 
     final bool isShowingReward = _habitIdInRewardState == habit.id;
 

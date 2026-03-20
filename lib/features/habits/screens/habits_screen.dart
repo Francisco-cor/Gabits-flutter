@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gabits/generated/l10n/app_localizations.dart';
 import 'package:gabits/features/habits/screens/new_habit_screen.dart';
 import 'package:gabits/models/habit_model.dart';
+import 'package:gabits/utils/schedule_utils.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:gabits/providers/habits_provider.dart';
 import 'package:isar_community/isar.dart';
@@ -98,30 +99,8 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen>
 
   void _showHabitDetailsPopup(
       Habit habit, AppLocalizations localizations, ThemeData theme) {
-    List<String> dayChars = habit.scheduleDays.map((dayIndex) {
-      switch (dayIndex) {
-        case 0:
-          return localizations.sundayShort;
-        case 1:
-          return localizations.mondayShort;
-        case 2:
-          return localizations.tuesdayShort;
-        case 3:
-          return localizations.wednesdayShort;
-        case 4:
-          return localizations.thursdayShort;
-        case 5:
-          return localizations.fridayShort;
-        case 6:
-          return localizations.saturdayShort;
-        default:
-          return '';
-      }
-    }).toList();
-    String scheduleString = dayChars.join(', ');
-    if (habit.scheduleDays.length == 7) {
-      scheduleString = localizations.everyDay;
-    }
+    final String scheduleString =
+        formatScheduleString(habit.scheduleDays, localizations);
 
     showDialog(
       context: context,
@@ -324,30 +303,8 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen>
         final habit = habits[index];
         final bool showInlineOptions = _habitIdWithOptionsOpen == habit.id;
 
-        String scheduleString = habit.scheduleDays.map((dayIndex) {
-          switch (dayIndex) {
-            case 0:
-              return localizations.sundayShort;
-            case 1:
-              return localizations.mondayShort;
-            case 2:
-              return localizations.tuesdayShort;
-            case 3:
-              return localizations.wednesdayShort;
-            case 4:
-              return localizations.thursdayShort;
-            case 5:
-              return localizations.fridayShort;
-            case 6:
-              return localizations.saturdayShort;
-            default:
-              return '';
-          }
-        }).join(', ');
-
-        if (habit.scheduleDays.length == 7) {
-          scheduleString = localizations.everyDay;
-        }
+        final String scheduleString =
+            formatScheduleString(habit.scheduleDays, localizations);
 
         return Card(
           margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
