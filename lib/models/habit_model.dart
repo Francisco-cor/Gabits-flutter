@@ -33,7 +33,20 @@ class Habit {
   set startTime(TimeOfDay t) => startTimeMinutes = t.hour * 60 + t.minute;
 
   List<int> scheduleDays;
-  bool isCompleted;
+
+  /// Stored as yyyyMMdd (e.g. 20260320). 0 means never completed.
+  /// Compared against today to determine [isCompleted].
+  int completedOnDay;
+
+  static int _getTodayInt() {
+    final now = DateTime.now();
+    return now.year * 10000 + now.month * 100 + now.day;
+  }
+
+  @Ignore()
+  bool get isCompleted => completedOnDay == Habit._getTodayInt();
+  set isCompleted(bool v) =>
+      completedOnDay = v ? Habit._getTodayInt() : 0;
 
   // Constructor principal que Isar usará (y tú también puedes usarlo si tienes los valores "crudos")
   Habit({
@@ -44,7 +57,7 @@ class Habit {
     required this.colorValue, // Acepta el int directamente
     required this.scheduleDays,
     required this.startTimeMinutes, // Acepta el int directamente
-    this.isCompleted = false,
+    this.completedOnDay = 0,
   }) {
     // Validaciones si es necesario
     if (goalType == GoalType.yesNo) {
@@ -61,7 +74,6 @@ class Habit {
     required Color color, // Recibe Color
     required List<int> scheduleDays,
     required TimeOfDay startTime, // Recibe TimeOfDay
-    bool isCompleted = false,
   }) {
     final habit = Habit(
       name: name,
@@ -71,7 +83,6 @@ class Habit {
       colorValue: color.value, // Convierte aquí
       scheduleDays: scheduleDays,
       startTimeMinutes: startTime.hour * 60 + startTime.minute, // Convierte aquí
-      isCompleted: isCompleted,
     );
     // Validaciones específicas del constructor .create si son diferentes
     if (goalType != GoalType.yesNo && (goalValue == null || goalValue <= 0)) {
@@ -104,7 +115,9 @@ class Habit {
       colorValue: color?.value ?? this.colorValue, // Usa colorValue
       scheduleDays: scheduleDays ?? this.scheduleDays,
       startTimeMinutes: startTime != null ? (startTime.hour * 60 + startTime.minute) : this.startTimeMinutes, // Usa startTimeMinutes
-      isCompleted: isCompleted ?? this.isCompleted,
+      completedOnDay: isCompleted != null
+          ? (isCompleted ? Habit._getTodayInt() : 0)
+          : this.completedOnDay,
     );
     newHabit.id = this.id;
     return newHabit;
@@ -122,6 +135,6 @@ class Habit {
   @override
   String toString() {
     final st = startTime;
-    return 'Habit(id: $id, name: $name, startTime: ${st.hour}:${st.minute}, isCompleted: $isCompleted)';
+    return 'Habit(id: $id, name: $name, startTime: ${st.hour}:${st.minute}, completedOnDay: $completedOnDay)';
   }
 }

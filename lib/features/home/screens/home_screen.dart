@@ -69,6 +69,15 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
   }
 
   @override
+  void deactivate() {
+    // Clear reward state when navigating away so it never re-appears stale.
+    _rewardTimer?.cancel();
+    _rewardTimer = null;
+    _habitIdInRewardState = null;
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _closeFabMenu();
     _updateTimer?.cancel();

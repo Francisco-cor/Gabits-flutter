@@ -22,31 +22,31 @@ const HabitSchema = CollectionSchema(
       name: r'colorValue',
       type: IsarType.long,
     ),
-    r'description': PropertySchema(
+    r'completedOnDay': PropertySchema(
       id: 1,
+      name: r'completedOnDay',
+      type: IsarType.long,
+    ),
+    r'description': PropertySchema(
+      id: 2,
       name: r'description',
       type: IsarType.string,
     ),
     r'goalType': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'goalType',
       type: IsarType.byte,
       enumMap: _HabitgoalTypeEnumValueMap,
     ),
     r'goalValue': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'goalValue',
       type: IsarType.double,
     ),
     r'hashCode': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'hashCode',
       type: IsarType.long,
-    ),
-    r'isCompleted': PropertySchema(
-      id: 5,
-      name: r'isCompleted',
-      type: IsarType.bool,
     ),
     r'name': PropertySchema(
       id: 6,
@@ -116,11 +116,11 @@ void _habitSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeLong(offsets[0], object.colorValue);
-  writer.writeString(offsets[1], object.description);
-  writer.writeByte(offsets[2], object.goalType.index);
-  writer.writeDouble(offsets[3], object.goalValue);
-  writer.writeLong(offsets[4], object.hashCode);
-  writer.writeBool(offsets[5], object.isCompleted);
+  writer.writeLong(offsets[1], object.completedOnDay);
+  writer.writeString(offsets[2], object.description);
+  writer.writeByte(offsets[3], object.goalType.index);
+  writer.writeDouble(offsets[4], object.goalValue);
+  writer.writeLong(offsets[5], object.hashCode);
   writer.writeString(offsets[6], object.name);
   writer.writeLongList(offsets[7], object.scheduleDays);
   writer.writeLong(offsets[8], object.startTimeMinutes);
@@ -134,11 +134,11 @@ Habit _habitDeserialize(
 ) {
   final object = Habit(
     colorValue: reader.readLong(offsets[0]),
-    description: reader.readStringOrNull(offsets[1]),
-    goalType: _HabitgoalTypeValueEnumMap[reader.readByteOrNull(offsets[2])] ??
+    completedOnDay: reader.readLongOrNull(offsets[1]) ?? 0,
+    description: reader.readStringOrNull(offsets[2]),
+    goalType: _HabitgoalTypeValueEnumMap[reader.readByteOrNull(offsets[3])] ??
         GoalType.yesNo,
-    goalValue: reader.readDoubleOrNull(offsets[3]),
-    isCompleted: reader.readBoolOrNull(offsets[5]) ?? false,
+    goalValue: reader.readDoubleOrNull(offsets[4]),
     name: reader.readString(offsets[6]),
     scheduleDays: reader.readLongList(offsets[7]) ?? [],
     startTimeMinutes: reader.readLong(offsets[8]),
@@ -157,16 +157,16 @@ P _habitDeserializeProp<P>(
     case 0:
       return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset) ?? 0) as P;
     case 2:
+      return (reader.readStringOrNull(offset)) as P;
+    case 3:
       return (_HabitgoalTypeValueEnumMap[reader.readByteOrNull(offset)] ??
           GoalType.yesNo) as P;
-    case 3:
-      return (reader.readDoubleOrNull(offset)) as P;
     case 4:
-      return (reader.readLong(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 5:
-      return (reader.readBoolOrNull(offset) ?? false) as P;
+      return (reader.readLong(offset)) as P;
     case 6:
       return (reader.readString(offset)) as P;
     case 7:
@@ -464,6 +464,59 @@ extension HabitQueryFilter on QueryBuilder<Habit, Habit, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'colorValue',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> completedOnDayEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'completedOnDay',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> completedOnDayGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'completedOnDay',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> completedOnDayLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'completedOnDay',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> completedOnDayBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'completedOnDay',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -853,16 +906,6 @@ extension HabitQueryFilter on QueryBuilder<Habit, Habit, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Habit, Habit, QAfterFilterCondition> isCompletedEqualTo(
-      bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isCompleted',
-        value: value,
-      ));
-    });
-  }
-
   QueryBuilder<Habit, Habit, QAfterFilterCondition> nameEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1201,6 +1244,18 @@ extension HabitQuerySortBy on QueryBuilder<Habit, Habit, QSortBy> {
     });
   }
 
+  QueryBuilder<Habit, Habit, QAfterSortBy> sortByCompletedOnDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'completedOnDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterSortBy> sortByCompletedOnDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'completedOnDay', Sort.desc);
+    });
+  }
+
   QueryBuilder<Habit, Habit, QAfterSortBy> sortByDescription() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'description', Sort.asc);
@@ -1249,18 +1304,6 @@ extension HabitQuerySortBy on QueryBuilder<Habit, Habit, QSortBy> {
     });
   }
 
-  QueryBuilder<Habit, Habit, QAfterSortBy> sortByIsCompleted() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isCompleted', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Habit, Habit, QAfterSortBy> sortByIsCompletedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isCompleted', Sort.desc);
-    });
-  }
-
   QueryBuilder<Habit, Habit, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -1296,6 +1339,18 @@ extension HabitQuerySortThenBy on QueryBuilder<Habit, Habit, QSortThenBy> {
   QueryBuilder<Habit, Habit, QAfterSortBy> thenByColorValueDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'colorValue', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterSortBy> thenByCompletedOnDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'completedOnDay', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Habit, Habit, QAfterSortBy> thenByCompletedOnDayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'completedOnDay', Sort.desc);
     });
   }
 
@@ -1359,18 +1414,6 @@ extension HabitQuerySortThenBy on QueryBuilder<Habit, Habit, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Habit, Habit, QAfterSortBy> thenByIsCompleted() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isCompleted', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Habit, Habit, QAfterSortBy> thenByIsCompletedDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isCompleted', Sort.desc);
-    });
-  }
-
   QueryBuilder<Habit, Habit, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -1403,6 +1446,12 @@ extension HabitQueryWhereDistinct on QueryBuilder<Habit, Habit, QDistinct> {
     });
   }
 
+  QueryBuilder<Habit, Habit, QDistinct> distinctByCompletedOnDay() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'completedOnDay');
+    });
+  }
+
   QueryBuilder<Habit, Habit, QDistinct> distinctByDescription(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1425,12 +1474,6 @@ extension HabitQueryWhereDistinct on QueryBuilder<Habit, Habit, QDistinct> {
   QueryBuilder<Habit, Habit, QDistinct> distinctByHashCode() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'hashCode');
-    });
-  }
-
-  QueryBuilder<Habit, Habit, QDistinct> distinctByIsCompleted() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isCompleted');
     });
   }
 
@@ -1467,6 +1510,12 @@ extension HabitQueryProperty on QueryBuilder<Habit, Habit, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Habit, int, QQueryOperations> completedOnDayProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'completedOnDay');
+    });
+  }
+
   QueryBuilder<Habit, String?, QQueryOperations> descriptionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'description');
@@ -1488,12 +1537,6 @@ extension HabitQueryProperty on QueryBuilder<Habit, Habit, QQueryProperty> {
   QueryBuilder<Habit, int, QQueryOperations> hashCodeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'hashCode');
-    });
-  }
-
-  QueryBuilder<Habit, bool, QQueryOperations> isCompletedProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isCompleted');
     });
   }
 

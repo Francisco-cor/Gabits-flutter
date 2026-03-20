@@ -6,7 +6,7 @@ part of 'habits_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$habitsNotifierHash() => r'2ce2a3dcdb644d3953093e519a3c4e21bdad0ac1';
+String _$habitsNotifierHash() => r'fdeecf753fc2e081215e244c3a4f431fdefe23fb';
 
 /// See also [HabitsNotifier].
 @ProviderFor(HabitsNotifier)

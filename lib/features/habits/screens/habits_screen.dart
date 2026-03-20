@@ -410,8 +410,8 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen>
                               decoration: BoxDecoration(color: habit.color)),
                           Expanded(
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14.0, vertical: 12.0),
+                              padding: const EdgeInsets.only(
+                                  left: 14.0, top: 12.0, bottom: 12.0, right: 4.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -485,6 +485,15 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen>
                                   ],
                                 ],
                               ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 10.0),
+                            child: Icon(
+                              Icons.more_vert,
+                              size: 16,
+                              color: theme.colorScheme.onSurfaceVariant
+                                  .withOpacity(0.3),
                             ),
                           ),
                         ],
