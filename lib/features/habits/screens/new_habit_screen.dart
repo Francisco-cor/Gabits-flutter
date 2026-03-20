@@ -150,14 +150,18 @@ class _NewHabitScreenState extends State<NewHabitScreen> with SingleTickerProvid
   }
 
   Widget _buildSectionTitle(String title, ThemeData theme) {
-    return Text(title, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold));
+    return Text(title, style: theme.textTheme.labelLarge?.copyWith(
+      fontWeight: FontWeight.w500,
+      color: theme.colorScheme.onSurface.withOpacity(0.7),
+      letterSpacing: 0.3,
+    ));
   }
 
   InputDecoration _inputDecoration(ThemeData theme, String hintText, Color defaultBorderColor, double defaultBorderWidth, double selectedBorderWidth) {
     return InputDecoration(
       hintText: hintText,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.4),
       contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide(color: defaultBorderColor, width: defaultBorderWidth)),
       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide(color: defaultBorderColor, width: defaultBorderWidth)),
@@ -193,28 +197,28 @@ class _NewHabitScreenState extends State<NewHabitScreen> with SingleTickerProvid
     final formWidgets = <Widget>[
       // ... tus widgets del formulario sin cambios ...
       _buildSectionTitle(localizations.habitNameLabel, theme),
-      const SizedBox(height: 8),
+      const SizedBox(height: 6),
       TextFormField(controller: _nameController, decoration: _inputDecoration(theme, localizations.habitNameHint, defaultElementBorderColor, defaultElementBorderWidth, selectedElementBorderWidth), validator: (v)=>(v==null||v.trim().isEmpty)?localizations.habitNameRequired:null, textCapitalization: TextCapitalization.sentences),
-      const SizedBox(height: 24),
+      const SizedBox(height: 18),
 
       _buildSectionTitle(localizations.descriptionLabel, theme),
-      const SizedBox(height: 8),
+      const SizedBox(height: 6),
       TextFormField(controller: _descriptionController, maxLines: 3, decoration: _inputDecoration(theme, localizations.descriptionHint, defaultElementBorderColor, defaultElementBorderWidth, selectedElementBorderWidth), textCapitalization: TextCapitalization.sentences),
-      const SizedBox(height: 24),
+      const SizedBox(height: 18),
 
       _buildSectionTitle(localizations.hourLabel, theme),
-      const SizedBox(height: 8),
+      const SizedBox(height: 6),
       GestureDetector(key: _hourWidgetKey, onTap: () => _selectTime(context),
           child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-              decoration: BoxDecoration(border: Border.all(color: defaultElementBorderColor, width: defaultElementBorderWidth), borderRadius: BorderRadius.circular(12.0), color: Colors.white),
-              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [ Text(_selectedTime.format(context), style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface)), Icon(Icons.access_time_rounded, color: theme.colorScheme.onSurfaceVariant)])
+              padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 14.0),
+              decoration: BoxDecoration(border: Border.all(color: defaultElementBorderColor, width: defaultElementBorderWidth), borderRadius: BorderRadius.circular(12.0), color: theme.colorScheme.surfaceVariant.withOpacity(0.4)),
+              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [ Text(_selectedTime.format(context), style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface)), Icon(Icons.access_time_rounded, size: 18, color: theme.colorScheme.onSurfaceVariant)])
           )
       ),
-      const SizedBox(height: 24),
+      const SizedBox(height: 18),
 
       _buildSectionTitle(localizations.scheduleLabel, theme),
-      const SizedBox(height: 10),
+      const SizedBox(height: 8),
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(7, (index) {
           bool isSelected = _selectedDaysBool[index];
@@ -233,10 +237,10 @@ class _NewHabitScreenState extends State<NewHabitScreen> with SingleTickerProvid
           );
         }),
       ),
-      const SizedBox(height: 24),
+      const SizedBox(height: 18),
 
       _buildSectionTitle(localizations.colorLabel, theme),
-      const SizedBox(height: 10),
+      const SizedBox(height: 8),
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: List.generate(_commonColors.length + 1, (index) {
           final double itemDiameter = circleDiameter;
@@ -278,10 +282,10 @@ class _NewHabitScreenState extends State<NewHabitScreen> with SingleTickerProvid
           }
         }),
       ),
-      const SizedBox(height: 24),
+      const SizedBox(height: 18),
 
       _buildSectionTitle(localizations.goalTypeLabel, theme),
-      const SizedBox(height: 10),
+      const SizedBox(height: 8),
       SizedBox(width: availableWidth,
           child: ToggleButtons(isSelected: _goalTypeSelections,
             onPressed: (int index) => setState(() { for (int i = 0; i < _goalTypeSelections.length; i++) _goalTypeSelections[i] = i == index; _selectedGoalType = GoalType.values[index]; if (_selectedGoalType == GoalType.yesNo) _quantityTimeController.clear(); }),
@@ -385,8 +389,8 @@ class _NewHabitScreenState extends State<NewHabitScreen> with SingleTickerProvid
                   Navigator.pop(context, habitToReturn);
                 }
               },
-              style: FilledButton.styleFrom(backgroundColor: const Color(0xFFEEEEEE), foregroundColor: Colors.black, padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0))),
-              child: Text(localizations.doneButtonLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+              style: FilledButton.styleFrom(backgroundColor: theme.colorScheme.surfaceVariant, foregroundColor: theme.colorScheme.onSurface, padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8.0), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0))),
+              child: Text(localizations.doneButtonLabel, style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
             ),
           ),
         ],

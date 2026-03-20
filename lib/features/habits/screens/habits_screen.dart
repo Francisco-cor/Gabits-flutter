@@ -449,50 +449,50 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen>
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Container(
-                              width: 10.0,
+                              width: 4.0,
                               decoration: BoxDecoration(color: habit.color)),
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0, vertical: 14.0),
+                                  horizontal: 14.0, vertical: 12.0),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(habit.name,
-                                      style: theme.textTheme.titleMedium
+                                      style: theme.textTheme.titleSmall
                                           ?.copyWith(
-                                              fontWeight: FontWeight.w600),
+                                              fontWeight: FontWeight.w500),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis),
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: 4),
                                   Row(
                                     children: [
                                       Icon(Icons.access_time_rounded,
-                                          size: 16,
+                                          size: 13,
                                           color: theme
                                               .colorScheme.onSurfaceVariant),
-                                      const SizedBox(width: 6),
+                                      const SizedBox(width: 5),
                                       Text(habit.startTime.format(context),
-                                          style: theme.textTheme.bodyMedium
+                                          style: theme.textTheme.bodySmall
                                               ?.copyWith(
                                                   color: theme.colorScheme
                                                       .onSurfaceVariant)),
                                     ],
                                   ),
                                   if (scheduleString.isNotEmpty) ...[
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 3),
                                     Row(
                                       children: [
                                         Icon(Icons.calendar_today_outlined,
-                                            size: 15,
+                                            size: 13,
                                             color: theme
                                                 .colorScheme.onSurfaceVariant),
-                                        const SizedBox(width: 6),
+                                        const SizedBox(width: 5),
                                         Expanded(
                                             child: Text(scheduleString,
                                                 style: theme
-                                                    .textTheme.bodyMedium
+                                                    .textTheme.bodySmall
                                                     ?.copyWith(
                                                         color: theme.colorScheme
                                                             .onSurfaceVariant),
@@ -504,7 +504,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen>
                                   if (habit.goalType != GoalType.yesNo &&
                                       habit.goalValue != null &&
                                       habit.goalValue! > 0) ...[
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 3),
                                     Row(
                                       children: [
                                         Icon(
@@ -512,13 +512,13 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen>
                                                 ? Icons.timer_outlined
                                                 : Icons
                                                     .format_list_numbered_rtl_rounded,
-                                            size: 16,
+                                            size: 13,
                                             color: theme
                                                 .colorScheme.onSurfaceVariant),
-                                        const SizedBox(width: 6),
+                                        const SizedBox(width: 5),
                                         Text(
                                           '${habit.goalType == GoalType.time ? localizations.goalTypeTime : localizations.goalTypeQuantity}: ${habit.goalValue?.toStringAsFixed(0)}${habit.goalType == GoalType.time ? " ${localizations.minutesShort}" : ""}',
-                                          style: theme.textTheme.bodyMedium
+                                          style: theme.textTheme.bodySmall
                                               ?.copyWith(
                                                   color: theme.colorScheme
                                                       .onSurfaceVariant),

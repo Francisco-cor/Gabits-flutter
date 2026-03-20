@@ -357,7 +357,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 12.0),
+            padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -421,13 +421,13 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
           ),
           Padding(
             padding:
-                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
             child: Text(
               _currentDate,
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withOpacity(0.9),
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurface.withOpacity(0.75),
               ),
             ).animate().fadeIn(delay: 700.ms, duration: 400.ms),
           ),
@@ -627,7 +627,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Container(
-                      width: 10.0,
+                      width: 4.0,
                       decoration: BoxDecoration(
                         color: currentCardStripeColor,
                         borderRadius: BorderRadius.only(
@@ -638,33 +638,33 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 14.0),
+                            horizontal: 14.0, vertical: 12.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(habit.name,
                                 style: TextStyle(
-                                    fontSize: 17.5,
-                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15.5,
+                                    fontWeight: FontWeight.w500,
                                     color: currentCardTextColor,
                                     decoration: cardTextDecoration,
                                     decorationColor:
                                         currentCardTextColor.withOpacity(0.8)),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 5),
                             Row(
                               children: [
                                 Icon(Icons.schedule_rounded,
-                                    size: 17, color: detailIconsColor),
-                                const SizedBox(width: 6),
+                                    size: 14, color: detailIconsColor),
+                                const SizedBox(width: 5),
                                 Text('${localizations.today} $formattedTime',
                                     style: TextStyle(
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w400,
                                         color: currentCardTextColor
-                                            .withOpacity(0.9),
+                                            .withOpacity(0.8),
                                         decoration: cardTextDecoration,
                                         decorationColor: currentCardTextColor
                                             .withOpacity(0.8))),
@@ -672,8 +672,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                                 if (!habit.isCompleted)
                                   Text(remainingTimeText,
                                       style: TextStyle(
-                                          fontSize: 14.5,
-                                          fontWeight: FontWeight.w500,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w400,
                                           color: isPassed
                                               ? Colors.red.shade400
                                                   .withOpacity(0.8)
@@ -687,7 +687,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                                 habit.goalValue != null &&
                                 habit.goalValue! > 0)
                               Padding(
-                                padding: const EdgeInsets.only(top: 7.0),
+                                padding: const EdgeInsets.only(top: 4.0),
                                 child: Row(
                                   children: [
                                     Icon(
@@ -695,16 +695,16 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                                             ? Icons.timer_outlined
                                             : Icons
                                                 .format_list_numbered_rounded,
-                                        size: 16,
+                                        size: 13,
                                         color: detailIconsColor),
-                                    const SizedBox(width: 6.0),
+                                    const SizedBox(width: 5.0),
                                     Text(
                                       '${habit.goalType == GoalType.time ? localizations.goalTypeTime : localizations.goalTypeQuantity}: ${habit.goalValue?.toStringAsFixed(0) ?? ""}${habit.goalType == GoalType.time ? " ${localizations.minutesShort}" : ""}',
                                       style: TextStyle(
-                                          fontSize: 13.5,
+                                          fontSize: 12,
                                           fontStyle: FontStyle.italic,
                                           color: currentCardTextColor
-                                              .withOpacity(0.8),
+                                              .withOpacity(0.7),
                                           decoration: cardTextDecoration,
                                           decorationColor: currentCardTextColor
                                               .withOpacity(0.8)),
@@ -719,7 +719,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                     if (habit.goalType == GoalType.yesNo &&
                         (!isPassed || habit.isCompleted))
                       Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
+                        padding: const EdgeInsets.only(right: 6.0),
                         child: Tooltip(
                           message: habit.isCompleted
                               ? localizations.done
@@ -732,11 +732,11 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                               color: habit.isCompleted
                                   ? Colors.green.shade500
                                   : theme.colorScheme.secondary
-                                      .withOpacity(0.85),
-                              size: 28,
+                                      .withOpacity(0.7),
+                              size: 22,
                             ),
                             onPressed: () => _toggleHabitCompleted(habit),
-                            splashRadius: 24.0,
+                            splashRadius: 20.0,
                           ),
                         ),
                       ),
@@ -763,21 +763,21 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
     return Expanded(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(12.0),
         splashColor: splashColor,
         highlightColor: highlightColor,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(icon, size: 30.0, color: theme.colorScheme.primary),
-              const SizedBox(height: 10.0),
+              Icon(icon, size: 24.0, color: theme.colorScheme.primary),
+              const SizedBox(height: 7.0),
               Text(label,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w400,
                       color: textColor),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis),
