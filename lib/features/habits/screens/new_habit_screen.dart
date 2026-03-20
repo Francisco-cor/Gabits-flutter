@@ -157,18 +157,8 @@ class _NewHabitScreenState extends State<NewHabitScreen> with SingleTickerProvid
     ));
   }
 
-  InputDecoration _inputDecoration(ThemeData theme, String hintText, Color defaultBorderColor, double defaultBorderWidth, double selectedBorderWidth) {
-    return InputDecoration(
-      hintText: hintText,
-      filled: true,
-      fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.4),
-      contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide(color: defaultBorderColor, width: defaultBorderWidth)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide(color: defaultBorderColor, width: defaultBorderWidth)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide(color: theme.colorScheme.primary, width: selectedBorderWidth)),
-      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide(color: theme.colorScheme.error, width: defaultBorderWidth)),
-      focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0), borderSide: BorderSide(color: theme.colorScheme.error, width: selectedBorderWidth)),
-    );
+  InputDecoration _inputDecoration(String hintText) {
+    return InputDecoration(hintText: hintText);
   }
 
 
@@ -198,12 +188,12 @@ class _NewHabitScreenState extends State<NewHabitScreen> with SingleTickerProvid
       // ... tus widgets del formulario sin cambios ...
       _buildSectionTitle(localizations.habitNameLabel, theme),
       const SizedBox(height: 6),
-      TextFormField(controller: _nameController, decoration: _inputDecoration(theme, localizations.habitNameHint, defaultElementBorderColor, defaultElementBorderWidth, selectedElementBorderWidth), validator: (v)=>(v==null||v.trim().isEmpty)?localizations.habitNameRequired:null, textCapitalization: TextCapitalization.sentences),
+      TextFormField(controller: _nameController, decoration: _inputDecoration(localizations.habitNameHint), validator: (v)=>(v==null||v.trim().isEmpty)?localizations.habitNameRequired:null, textCapitalization: TextCapitalization.sentences),
       const SizedBox(height: 18),
 
       _buildSectionTitle(localizations.descriptionLabel, theme),
       const SizedBox(height: 6),
-      TextFormField(controller: _descriptionController, maxLines: 3, decoration: _inputDecoration(theme, localizations.descriptionHint, defaultElementBorderColor, defaultElementBorderWidth, selectedElementBorderWidth), textCapitalization: TextCapitalization.sentences),
+      TextFormField(controller: _descriptionController, maxLines: 3, decoration: _inputDecoration(localizations.descriptionHint), textCapitalization: TextCapitalization.sentences),
       const SizedBox(height: 18),
 
       _buildSectionTitle(localizations.hourLabel, theme),
@@ -226,7 +216,7 @@ class _NewHabitScreenState extends State<NewHabitScreen> with SingleTickerProvid
               child: AnimatedContainer(duration: const Duration(milliseconds: 200), curve: Curves.easeInOut,
                   width: circleDiameter, height: circleDiameter,
                   decoration: BoxDecoration(
-                    color: isSelected ? theme.colorScheme.primary : Colors.white,
+                    color: isSelected ? theme.colorScheme.primary : theme.colorScheme.surfaceVariant,
                     shape: BoxShape.circle,
                     border: Border.all(color: isSelected ? theme.colorScheme.primary : defaultElementBorderColor, width: isSelected ? selectedElementBorderWidth : defaultElementBorderWidth),
                     boxShadow: isSelected ? [BoxShadow(color: theme.colorScheme.primary.withOpacity(0.3), blurRadius: 4, offset: Offset(0,2))] : [],
@@ -266,10 +256,10 @@ class _NewHabitScreenState extends State<NewHabitScreen> with SingleTickerProvid
                 child: AnimatedContainer(duration: const Duration(milliseconds: 200), curve: Curves.easeInOut,
                     width: itemDiameter, height: itemDiameter,
                     decoration: BoxDecoration(
-                      color: isCustomColorActive ? _selectedColor : Colors.white,
+                      color: isCustomColorActive ? _selectedColor : theme.colorScheme.surfaceVariant,
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: isCustomColorActive ? _selectedColor.withOpacity(0.7) : Colors.grey.shade300,
+                          color: isCustomColorActive ? _selectedColor.withOpacity(0.7) : defaultElementBorderColor,
                           width: isCustomColorActive ? 2.5 : 1.0
                       ),
                       boxShadow: isCustomColorActive ? [BoxShadow(color: _selectedColor.withOpacity(0.35), blurRadius: 4, offset: Offset(0,1.5))] : [],
@@ -342,7 +332,7 @@ class _NewHabitScreenState extends State<NewHabitScreen> with SingleTickerProvid
             TextFormField(
               controller: _quantityTimeController,
               keyboardType: const TextInputType.numberWithOptions(decimal: false),
-              decoration: _inputDecoration(theme, _selectedGoalType == GoalType.time ? localizations.timeHint : localizations.quantityHint, defaultElementBorderColor, defaultElementBorderWidth, selectedElementBorderWidth),
+              decoration: _inputDecoration(_selectedGoalType == GoalType.time ? localizations.timeHint : localizations.quantityHint),
               validator: (v) { if (v == null || v.trim().isEmpty) return localizations.habitGoalValueRequired; if (int.tryParse(v.trim()) == null || int.parse(v.trim()) <=0) return localizations.habitGoalValueInvalid; return null; },
             ),
             const SizedBox(height: 16),

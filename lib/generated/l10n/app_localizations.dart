@@ -1051,6 +1051,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your routine companion'**
   String get settingsAppDescription;
+
+  /// No description provided for @rewardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Great work!'**
+  String get rewardTitle;
 }
 
 class _AppLocalizationsDelegate

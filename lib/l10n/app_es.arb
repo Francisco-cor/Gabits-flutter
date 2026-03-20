@@ -231,5 +231,7 @@
     "settingsLanguageLabel": "Idioma",
     "settingsAboutSection": "Acerca de",
     "settingsAppName": "Gabits",
-    "settingsAppDescription": "Tu compañero de rutinas"
+    "settingsAppDescription": "Tu compañero de rutinas",
+
+    "rewardTitle": "¡Excelente trabajo!"
 }

@@ -90,6 +90,36 @@ class AppTheme {
               fontWeight: FontWeight.w500,
               fontSize: 14,
               color: fabForegroundColor)),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.grey.shade100,
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 14.0, horizontal: 12.0),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1.5),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide:
+              const BorderSide(color: primaryAppColor, width: 2.0),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide:
+              BorderSide(color: Colors.red.shade700, width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: BorderSide(color: Colors.red.shade700, width: 2.0),
+        ),
+        hintStyle: TextStyle(color: lightText.withAlpha(150)),
+        labelStyle: const TextStyle(color: lightText),
+      ),
     );
   }
 

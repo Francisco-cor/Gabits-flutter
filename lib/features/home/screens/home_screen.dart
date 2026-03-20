@@ -606,8 +606,8 @@ class _MyHomePageState extends ConsumerState<MyHomePage>
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('¡Excelente trabajo!',
-                              style: TextStyle(
+                          Text(localizations.rewardTitle,
+                              style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16)),

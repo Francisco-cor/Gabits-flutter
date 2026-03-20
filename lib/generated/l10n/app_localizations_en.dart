@@ -513,4 +513,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsAppDescription => 'Your routine companion';
+
+  @override
+  String get rewardTitle => 'Great work!';
 }

@@ -521,4 +521,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settingsAppDescription => 'Tu compañero de rutinas';
+
+  @override
+  String get rewardTitle => '¡Excelente trabajo!';
 }
